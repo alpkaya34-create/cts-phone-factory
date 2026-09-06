@@ -54,13 +54,33 @@
             100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 25px rgba(0,242,254,1)); } 
         }
 
+        @keyframes beltScroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-18px); }
+        }
+
+        @keyframes stationBlink {
+            0%, 100% { opacity: 0.45; transform: scaleY(0.85); }
+            50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        @keyframes premiumShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.7) translateY(6px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
         .info-slide {
             position: absolute; width: 100%; top: 0; left: 0; opacity: 0;
-            animation: carousel-fade 50s infinite; text-align: center;
+            animation: carousel-fade 10s infinite; text-align: center;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        @keyframes carousel-fade { 0% { opacity: 0; } 2% { opacity: 1; } 8% { opacity: 1; } 10% { opacity: 0; } 100% { opacity: 0; } }
+        @keyframes carousel-fade { 0%, 5% { opacity: 0; } 12%, 43% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
         #main-menu-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -82,12 +102,25 @@
         .btn-dark { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid #ef4444; }
 
-        #profile-overlay, #leaderboard-overlay {
+        #profile-overlay, #leaderboard-overlay, #achievements-overlay, #settings-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at top, #0d1b2a 0%, #050811 100%);
             z-index: 1100; display: none; flex-direction: column; align-items: center;
             padding: 40px 20px 20px; box-sizing: border-box; overflow-y: auto;
         }
+
+        .page-scroll { width: 100%; flex: 1; overflow-y: auto; padding-bottom: 12px; }
+        .page-title { font-size: 24px; font-weight: 900; color: var(--accent-amber); letter-spacing: 2px; text-align: center; text-shadow: 0 0 15px rgba(245,158,11,0.5); margin-bottom: 5px; }
+        .page-subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin: 0 0 18px; }
+        .achievement-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px; margin-bottom: 10px; }
+        .achievement-card.completed { border-color: var(--accent-green); background: rgba(16,185,129,0.1); }
+        .achievement-card .achievement-state { color: var(--text-muted); font-size: 10px; font-weight: 800; }
+        .achievement-card.completed .achievement-state { color: var(--accent-green); }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 13px; margin-bottom: 9px; }
+        .settings-row-label { font-size: 12px; color: #fff; font-weight: 800; }
+        .settings-row-desc { display: block; font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 3px; }
+        .settings-toggle { border: 1px solid var(--accent-blue); color: var(--accent-blue); background: rgba(0,242,254,0.1); border-radius: 7px; padding: 7px 11px; font-size: 10px; font-weight: 900; cursor: pointer; min-width: 68px; }
+        .reset-confirm { display: none; background: rgba(239,68,68,0.1); border: 1px solid #ef4444; border-radius: 10px; padding: 12px; margin-top: 10px; }
 
         .profile-title { font-size: 24px; font-weight: 900; color: #c4b5fd; letter-spacing: 2px; text-shadow: 0 0 15px rgba(139, 92, 246, 0.5); margin-bottom: 5px; }
         .profile-username { font-size: 14px; color: #fff; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
@@ -102,11 +135,15 @@
             align-items: center; margin-bottom: 8px; font-size: 13px;
         }
 
+        /* ÜST BAR & TIKLANABİLİR BÖLÜMLER */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--panel-bg); border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: max(12px, env(safe-area-inset-top)); }
+        .top-click-box { padding: 4px 8px; border-radius: 8px; cursor: pointer; transition: background 0.15s ease, transform 0.1s; border: 1px solid transparent; }
+        .top-click-box:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+        .top-click-box:active { transform: scale(0.97); }
         .balance { font-size: 18px; font-weight: 800; color: var(--accent-green); }
         .rate-indicator { font-size: 10px; font-weight: bold; margin-top: 2px; }
         .debt-text { font-size: 10px; color: #ef4444; display: none; }
-        .btn-menu-open { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 800; margin-right: 12px; }
+        .btn-menu-open { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 800; margin-right: 10px; }
 
         .content-area { flex: 1; overflow-y: auto; padding: 15px; }
         .tab-content { display: none; }
@@ -121,7 +158,7 @@
         .assembly-bar { height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; margin: 10px 0 15px 0; border: 1px solid rgba(255,255,255,0.05); }
         .assembly-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00f2fe, #10b981); transition: width 0.1s linear; }
 
-        /* GERÇEK VE FİZİKSEL MONTAJ HATTI */
+        /* GERÇEK MONTAJ HATTI */
         .conveyor-stage {
             background: #090e17;
             border: 1px solid rgba(0, 242, 254, 0.25);
@@ -132,16 +169,43 @@
             overflow: hidden;
             display: flex;
             align-items: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.35);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .conveyor-belt-grid {
             position: absolute; width: 100%; height: 100%;
             background: repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(255,255,255,0.03) 15px, rgba(255,255,255,0.03) 18px);
+            animation: beltScroll 0.8s linear infinite;
+            animation-play-state: paused;
         }
+        .conveyor-stage.active {
+            border-color: rgba(0, 242, 254, 0.7);
+            box-shadow: inset 0 0 22px rgba(0,242,254,0.08), 0 0 16px rgba(0,242,254,0.12);
+        }
+        .conveyor-stage.active .conveyor-belt-grid {
+            animation-play-state: running;
+        }
+        .conveyor-lights {
+            position: absolute; left: 8px; top: 5px; display: flex; gap: 4px; z-index: 3;
+        }
+        .conveyor-light {
+            width: 5px; height: 5px; border-radius: 50%; background: #334155;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .conveyor-stage.active .conveyor-light {
+            background: var(--accent-green); box-shadow: 0 0 7px var(--accent-green);
+            animation: stationBlink 0.9s infinite;
+        }
+        .conveyor-light:nth-child(2) { animation-delay: 0.2s; }
+        .conveyor-light:nth-child(3) { animation-delay: 0.4s; }
+        .factory-process-labels { position: absolute; left: 9px; right: 40px; bottom: 4px; display: flex; justify-content: space-between; color: #64748b; font-size: 7px; letter-spacing: 0.5px; z-index: 2; }
+        .conveyor-stage.active .factory-process-labels { color: #a7f3d0; }
+        
         .conveyor-endpoint {
             position: absolute; right: 0; top: 0; width: 36px; height: 100%;
             background: linear-gradient(90deg, transparent, #10b98133);
             border-left: 1px dashed rgba(16, 185, 129, 0.4);
-            display: flex; align-items: center; justify-content: center; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
             z-index: 2;
         }
 
@@ -157,10 +221,35 @@
             display: none; text-align: center;
         }
 
+        .premium-card {
+            background: linear-gradient(135deg, rgba(251,191,36,0.17), rgba(120,53,15,0.22) 55%, rgba(17,24,39,0.9));
+            border: 1px solid #fbbf24; position: relative; overflow: hidden;
+            box-shadow: 0 0 20px rgba(245,158,11,0.14);
+        }
+        .premium-card::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.12) 45%, transparent 70%);
+            background-size: 200% 100%; animation: premiumShimmer 4s linear infinite;
+        }
+        #app-container.premium-active {
+            --accent-blue: #fbbf24;
+            --accent-green: #d4a72c;
+            --panel-bg: #1b1710;
+            --bg-dark: #0f0c05;
+            box-shadow: 0 0 35px rgba(245, 158, 11, 0.22);
+        }
+        #app-container.premium-active .top-bar,
+        #app-container.premium-active .bottom-nav { border-color: rgba(251,191,36,0.24); }
+        .premium-title { color: #fcd34d; text-shadow: 0 0 12px rgba(251,191,36,0.55); }
+        .premium-badge { display: none; color: #111827; background: linear-gradient(135deg,#fde68a,#f59e0b); border-radius: 10px; padding: 2px 7px; font-size: 9px; font-weight: 900; letter-spacing: 0.5px; }
+        .premium-active .premium-badge { display: inline-block; }
+        .production-toast { position: absolute; right: 10px; top: 4px; color: var(--accent-green); font-size: 10px; font-weight: 900; opacity: 0; pointer-events: none; z-index: 4; }
+        .production-toast.show { animation: popIn 0.8s ease-out forwards; }
+
         .bottom-nav { display: flex; justify-content: space-around; background: var(--panel-bg); padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
         .nav-item { color: var(--text-muted); text-align: center; font-size: 10px; font-weight: 600; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--accent-blue); font-weight: 800; }
-        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        .nav-item.active svg { filter: drop-shadow(0 0 6px var(--accent-blue)); }
         select { width: 100%; padding: 9px; background: #090e17; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; outline: none; font-size: 12px; }
 
         #custom-modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; padding: 20px; }
@@ -173,18 +262,53 @@
 
     <div id="app-container">
         
-        <!-- SİNEMATİK AÇILIŞ (SPLASH SCREEN) -->
+        <!-- SİNEMATİK AÇILIŞ -->
         <div id="intro-splash-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050814; z-index: 999999; display: flex; justify-content: center; align-items: center; transition: opacity 1.2s ease; overflow: hidden;">
             <div id="particle-container" style="position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
             <h1 id="intro-logo" style="font-size: 75px; font-weight: 900; color: #fff; font-family: sans-serif; letter-spacing: 6px; opacity: 0; transform: scale(0.6); transition: all 1.8s cubic-bezier(0.19, 1, 0.22, 1); z-index: 2;">CTS</h1>
         </div>
 
-        <!-- ÖZEL MODAL SİSTEMİ -->
+        <!-- ÖZEL MODAL -->
         <div id="custom-modal-overlay">
             <div id="custom-modal-box">
                 <h3 id="modal-title">BAŞLIK</h3>
                 <p id="modal-desc">Açıklama metni.</p>
                 <div id="modal-buttons" style="display: flex; gap: 10px; justify-content: center;"></div>
+            </div>
+        </div>
+
+        <!-- İFLAS VE TASFİYE EKRANI -->
+        <div id="bankruptcy-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #2a0808 0%, #050202 100%); z-index: 7000; flex-direction: column; justify-content: center; align-items: center; padding: 25px; box-sizing: border-box; text-align: center;">
+            <div style="background: rgba(15, 23, 42, 0.95); border: 2px solid #ef4444; border-radius: 16px; padding: 25px; width: 100%; max-width: 340px; box-shadow: 0 0 35px rgba(239, 68, 68, 0.5);">
+                <div style="margin-bottom: 10px;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                        <polyline points="17 18 23 18 23 12"></polyline>
+                    </svg>
+                </div>
+                <h2 style="color: #ef4444; margin: 0 0 8px 0; font-size: 20px; font-weight: 900; letter-spacing: 1px;">ŞİRKET İFLAS ETTİ!</h2>
+                <p id="bankruptcy-reason" style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px;">
+                    Nakit akışınızı yönetemediniz. Mahkeme kararıyla şirketin tüm mal varlığına el konuldu.
+                </p>
+
+                <div style="background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px; margin-bottom: 18px; text-align: left; font-size: 11px; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Son Kasa Durumu:</span>
+                        <span id="bankrupt-final-cash" style="color: #ef4444; font-weight: 800;">-$0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Ödenmeyen Borç:</span>
+                        <span id="bankrupt-final-debt" style="color: #ef4444; font-weight: 800;">$0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Toplam Üretilen Cihaz:</span>
+                        <span id="bankrupt-total-produced" style="color: #fff; font-weight: 800;">0</span>
+                    </div>
+                </div>
+
+                <button class="btn-action" onclick="restartAfterBankruptcy()" style="background: linear-gradient(135deg, #ef4444, #991b1b); font-size: 12px; font-weight: 900; padding: 14px;">
+                    YENİ ŞİRKET KUR ($50.000 İLE BAŞLA)
+                </button>
             </div>
         </div>
 
@@ -206,11 +330,11 @@
                 <div style="position: relative; height: 75px; margin-bottom: 15px;">
                     <div class="info-slide" style="animation-delay: 0s;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(16,185,129,0.6)); margin-bottom: 5px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;"><b>$50.000</b> sermaye ile başla,<br>7 kıtada teknoloji devini kur!</p>
+                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;"><b>$50.000</b> sermaye ile başla,<br>5 kademeli Ar-Ge ile dev ol!</p>
                     </div>
                     <div class="info-slide" style="animation-delay: 5s;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(251,191,36,0.6)); margin-bottom: 5px;"><polygon points="2 20 22 20 19 6 15 12 12 4 9 12 5 6 2 20"></polygon></svg>
-                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;">Fabrikanı geliştir,<br><b>otomasyon</b> ile saniyede binlerce telefon üret.</p>
+                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;">Premium ile oto-lojistik edin,<br><b>çevrimdışıyken</b> kasayı doldur.</p>
                     </div>
                 </div>
                 
@@ -230,14 +354,89 @@
 
         <!-- 2. ANA MENÜ EKRANI -->
         <div id="main-menu-overlay">
-            <div class="menu-title">PHONE FACTORY<span class="menu-subtitle">TYCOON</span></div>
+            <div class="menu-title" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                PHONE FACTORY
+                <!-- ÇİZİLEREK ORTAYA ÇIKAN VE İÇİ DOLAN TYCOON YAZISI -->
+                <svg width="220" height="35" viewBox="0 0 220 35" style="overflow: visible;">
+                    <style>
+                        @keyframes strokeDrawVerySlow {
+                            0% { stroke-dashoffset: 350; fill: transparent; filter: drop-shadow(0 0 0px rgba(245,158,11,0)); opacity: 1; }
+                            75% { stroke-dashoffset: 0; fill: transparent; filter: drop-shadow(0 0 8px rgba(245,158,11,0.6)); opacity: 1; }
+                            100% { stroke-dashoffset: 0; fill: var(--accent-amber); filter: drop-shadow(0 0 12px rgba(245,158,11,0.8)); opacity: 1; }
+                        }
+                        .tycoon-text-anim {
+                            font-family: 'Segoe UI', system-ui, sans-serif;
+                            font-size: 24px;
+                            font-weight: 900;
+                            letter-spacing: 5px;
+                            stroke: var(--accent-amber);
+                            stroke-width: 1.2px;
+                            stroke-dasharray: 350;
+                            stroke-dashoffset: 350;
+                            opacity: 0; /* Başlangıçta tamamen görünmez */
+                        }
+                        .tycoon-text-anim.play-animation {
+                            opacity: 1;
+                            animation: strokeDrawVerySlow 4.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                    </style>
+                    <text id="tycoon-svg-text" x="50%" y="26" text-anchor="middle" class="tycoon-text-anim">TYCOON</text>
+                </svg>
+            </div>
+            
             <div class="menu-buttons">
-                <button class="menu-btn btn-start" onclick="closeMainMenu()">SİMÜLASYONU BAŞLAT</button>
-                <button class="menu-btn btn-purple" onclick="openProfile()">PROFİL & İSTATİSTİKLER</button>
-                <button class="menu-btn btn-amber" onclick="openLeaderboard()">🌐 KÜRESEL LİDERLİK TABLOSU</button>
-                <button class="menu-btn btn-amber" onclick="showModal('BAŞARIMLAR', '🏆 İlk 1.000 Telefonu Üret!<br>🏆 7 Kıtada Pazar Ele Geçir!<br>🏆 Kendi Yapay Zekanı Kur!', 'info')">🏆 BAŞARIMLAR VE HEDEFLER</button>
-                <button class="menu-btn btn-dark" onclick="openSettingsModal()">AYARLAR</button>
-                <button class="menu-btn btn-danger" onclick="logoutFirebase()">ÇIKIŞ YAP</button>
+                <button class="menu-btn btn-start" onclick="closeMainMenu()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    SİMÜLASYONU BAŞLAT
+                </button>
+                
+                <button class="menu-btn btn-purple" onclick="openProfile()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(139,92,246,0.6));">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    PROFİL & İSTATİSTİKLER
+                </button>
+                
+                <button class="menu-btn btn-amber" onclick="openLeaderboard()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(0,242,254,0.6));">
+                        <circle cx="12" cy="12" r="10" fill="rgba(0, 242, 254, 0.1)"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    KÜRESEL LİDERLİK TABLOSU
+                </button>
+                
+                <button class="menu-btn btn-amber" onclick="openAchievements()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(245,158,11,0.6));">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16" stroke="#ef4444"></path>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" stroke="#ef4444"></path>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" stroke="#ef4444"></path>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" fill="rgba(245, 158, 11, 0.2)"></path>
+                    </svg>
+                    BAŞARIMLAR VE HEDEFLER
+                </button>
+                
+                <button class="menu-btn btn-dark" onclick="openSettingsPage()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    AYARLAR
+                </button>
+                
+                <button class="menu-btn btn-danger" onclick="logoutFirebase()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    ÇIKIŞ YAP
+                </button>
             </div>
             <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 1px;">POWERED BY <strong style="color: var(--accent-blue);">CYBER TYCOON STUDİO</strong></div>
         </div>
@@ -284,21 +483,153 @@
             <button class="btn-action" onclick="closeLeaderboard()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); margin-top: auto; width: 100%;">ANA MENÜYE DÖN</button>
         </div>
 
+        <!-- 3.6 BAŞARIMLAR SAYFASI -->
+        <div id="achievements-overlay">
+            <div class="page-scroll">
+                <div class="page-title">BAŞARIMLAR</div>
+                <p class="page-subtitle">Fabrikanın kilometre taşlarını tamamla ve imparatorluğunu büyüt.</p>
+
+                <div class="achievement-card" id="achievement-production">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">🏆 Seri Üretim</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">İlk 25.000 telefonu üret.</div></div>
+                        <span class="achievement-state" id="achievement-production-state">0 / 25.000</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-production-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-megafactory">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">🏭 Mega Fabrika</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Toplam 500.000 telefon üret.</div></div>
+                        <span class="achievement-state" id="achievement-megafactory-state">0 / 500.000</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-megafactory-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-market">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">🌍 Küresel Ağ</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">7 kıtada pazar payını %100'e çıkar.</div></div>
+                        <span class="achievement-state" id="achievement-market-state">0 / 7</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-market-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-billionaire">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">💰 Milyarder Kulübü</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">$50.000.000 nakit sermayeye ulaş.</div></div>
+                        <span class="achievement-state" id="achievement-billionaire-state">$0 / $50M</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-billionaire-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-quantum">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">⚛️ Kuantum Zirvesi</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Kademe 5 Kuantum Zirve lisansını al.</div></div>
+                        <span class="achievement-state" id="achievement-quantum-state">KİLİTLİ</span>
+                    </div>
+                </div>
+
+                <div class="achievement-card" id="achievement-ai">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">🤖 Yapay Zeka Çağı</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">İlk AI asistanını telefona entegre et.</div></div>
+                        <span class="achievement-state" id="achievement-ai-state">KİLİTLİ</span>
+                    </div>
+                </div>
+
+                <div class="achievement-card" id="achievement-os">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">💻 Yazılım Devi</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">CTS OS işletim sistemini v10 seviyesine getir.</div></div>
+                        <span class="achievement-state" id="achievement-os-state">v0 / v10</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-os-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-engineers">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">👥 Kurumsal Ordu</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">50 adet Mühendis Ekibi istihdam et.</div></div>
+                        <span class="achievement-state" id="achievement-engineers-state">0 / 50</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-engineers-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-bonds">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">📈 Holding İmparatorluğu</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">25 adet Şirket Tahvili ($250K) satın al.</div></div>
+                        <span class="achievement-state" id="achievement-bonds-state">$0 / $250K</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-bonds-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-warehouse">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">📦 Kusursuz Lojistik</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Depo kapasitesini 25.000 ve üzerine çıkar.</div></div>
+                        <span class="achievement-state" id="achievement-warehouse-state">500 / 25.000</span>
+                    </div>
+                    <div class="progress-bg" style="margin:10px 0 0;"><div class="progress-fill" id="achievement-warehouse-bar"></div></div>
+                </div>
+
+                <div class="achievement-card" id="achievement-patent">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                        <div><div style="font-size:13px; font-weight:900; color:#fff;">⭐ Patent Portföyü</div><div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Patentli bir amiral gemisi tasarla.</div></div>
+                        <span class="achievement-state" id="achievement-patent-state">KİLİTLİ</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="closeAchievements()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); width: 100%;">ANA MENÜYE DÖN</button>
+        </div>
+
+        <!-- 3.7 AYARLAR SAYFASI -->
+        <div id="settings-overlay">
+            <div class="page-scroll">
+                <div class="page-title" style="color:var(--accent-blue); text-shadow:0 0 15px rgba(0,242,254,0.5);">AYARLAR</div>
+                <p class="page-subtitle">Oyun deneyimini ve kayıt yönetimini buradan düzenle.</p>
+
+                <div class="settings-row">
+                    <div class="settings-row-label">Titreşim<span class="settings-row-desc">Üretim ve işlem geri bildirimleri</span></div>
+                    <button class="settings-toggle" id="settings-vibration" onclick="toggleSetting('vibration')">AÇIK</button>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-row-label">Ses Efektleri<span class="settings-row-desc">Üretim, satış ve yükseltme sesleri</span></div>
+                    <button class="settings-toggle" id="settings-sound" onclick="toggleSetting('sound')">AÇIK</button>
+                </div>
+
+                <div class="factory-card" style="margin-top:18px; border-color:rgba(239,68,68,0.35);">
+                    <h3 style="margin:0 0 6px; color:#f87171; font-size:14px;">⚠️ Kayıt Yönetimi</h3>
+                    <p style="font-size:11px; color:var(--text-muted); line-height:1.5; margin:0;">Fabrika seviyeleri, para, stok, pazarlar ve normal istatistikler sıfırlanır. Zirve varlık değerin, Premium üyeliğin ve reklamsız satın alımın korunur.</p>
+                    <button class="btn-action" onclick="requestResetGame()" style="background:rgba(239,68,68,0.16); border:1px solid #ef4444; color:#fca5a5; margin-top:12px;">OYUNU SIFIRLA</button>
+                    <div class="reset-confirm" id="reset-confirm">
+                        <div style="font-size:11px; color:#fecaca; font-weight:800; margin-bottom:9px;">Bu işlem geri alınamaz. Devam edilsin mi?</div>
+                        <div style="display:flex; gap:7px;"><button class="btn-action" onclick="cancelResetGame()" style="background:#334155; padding:9px;">VAZGEÇ</button><button class="btn-action" onclick="confirmResetGame()" style="background:#b91c1c; padding:9px;">EVET, SIFIRLA</button></div>
+                    </div>
+                    <div id="settings-notice" style="display:none; color:var(--accent-green); font-size:11px; font-weight:800; margin-top:10px;"></div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="closeSettings()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); width: 100%;">ANA MENÜYE DÖN</button>
+        </div>
+
         <!-- 4. OYUN İÇİ ÜST BAR -->
         <div class="top-bar">
             <div style="display: flex; align-items: center;">
                 <button class="btn-menu-open" onclick="openMainMenu()">« MENÜ</button>
-                <div>
-                    <div style="font-size: 10px; color: var(--text-muted);">Şirket Kasası</div>
+                <div class="top-click-box" onclick="openCashModal()" title="Kasa ve Finans Grafiğini Gör">
+                    <div style="font-size: 10px; color: var(--text-muted); display:flex; align-items:center; gap:3px;">
+                        <span>Şirket Kasası</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
                     <div class="balance" id="display-money">$50,000</div>
                     <div class="rate-indicator" id="display-net-rate">+ $0/sn</div>
                     <div class="debt-text" id="display-debt">Borç: $0</div>
                 </div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 10px; color: var(--text-muted);">Depo</div>
-                <div style="font-size: 14px; font-weight: bold;" id="display-stock">0 / 500</div>
-                <div style="font-size: 9px; color: var(--accent-blue);" id="sync-indicator">● Bulut Aktif</div>
+                <div class="top-click-box" onclick="openStorageModal()" title="Depo Kapasitesi ve Doluluk Oranını Gör">
+                    <div style="font-size: 10px; color: var(--text-muted); display:flex; align-items:center; justify-content:flex-end; gap:3px;">
+                        <span>Depo</span>
+                        <span class="premium-badge" id="premium-badge">PREMİUM</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div style="font-size: 14px; font-weight: bold;" id="display-stock">0 / 500</div>
+                    <div style="font-size: 9px; color: var(--accent-blue);" id="sync-indicator">● Bulut Aktif</div>
+                </div>
             </div>
         </div>
 
@@ -309,19 +640,39 @@
             <div id="tab-factory" class="tab-content active">
                 
                 <div class="hype-banner" id="hype-banner">
-                    <div style="font-size: 12px; font-weight: 900; color: var(--accent-amber);">🔥 LANSMAN ÇILGINLIĞI AKTİF!</div>
-                    <div style="font-size: 10px; color: #f8fafc; margin-top: 2px;">Basın Puanı: <b id="display-review-score">9.4/10</b> | Talep ve Satış Fiyatı x3! (<span id="hype-timer">60</span>s)</div>
+                    <div style="font-size: 12px; font-weight: 900; color: var(--accent-amber); display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                        </svg>
+                        LANSMAN ÇILGINLIĞI AKTİF!
+                    </div>
+                    <div style="font-size: 10px; color: #f8fafc; margin-top: 2px;">Basın Puanı: <b id="display-review-score">9.4/10</b> | Talep ve Satış Fiyatı +%35! (<span id="hype-timer">45</span>s)</div>
                 </div>
 
                 <div class="market-news-ticker">
-                    <span>📡</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                        <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path>
+                        <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+                        <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path>
+                    </svg>
                     <span id="market-news-text">Küresel çip arzı dengede. Parça tedarik fiyatları normal.</span>
                 </div>
 
-                <!-- GERÇEK MONTAJ HATTI SAHNESİ (Üretildikçe Cihazlar Kayar) -->
+                <!-- GERÇEK MONTAJ HATTI SAHNESİ -->
                 <div class="conveyor-stage" id="conveyor-stage">
                     <div class="conveyor-belt-grid"></div>
-                    <div class="conveyor-endpoint">📦</div>
+                    <div class="conveyor-lights"><span class="conveyor-light"></span><span class="conveyor-light"></span><span class="conveyor-light"></span></div>
+                    <div class="factory-process-labels"><span>ÇİP</span><span>EKRAN</span><span>KASA</span><span>TEST</span></div>
+                    <div class="production-toast" id="production-toast">+1 ÜRETİLDİ</div>
+                    <div class="conveyor-endpoint">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(16,185,129,0.5));">
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                            <path d="m3.3 7 8.7 5 8.7-5"></path>
+                            <path d="M12 22V12"></path>
+                        </svg>
+                    </div>
                 </div>
 
                 <!-- Ana Montaj Hattı Kartı -->
@@ -336,35 +687,55 @@
                         <span>Birim Maliyet:</span> <span id="factory-cost-display" style="color: #ef4444;">-$145</span>
                     </div>
                     <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span>Piyasa Satış Fiyatı:</span> <span id="factory-price-display" style="color: var(--accent-green);">+$310</span>
+                        <span>Piyasa Satış Fiyatı:</span> <span id="factory-price-display" style="color: var(--accent-green);">+$260</span>
                     </div>
 
                     <div class="assembly-bar"><div class="assembly-fill" id="assembly-fill"></div></div>
                     
                     <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                        <button class="btn-action" id="btn-manual-produce" style="background: linear-gradient(135deg, #00f2fe, #0284c7); color:#000; flex: 2;">🛠️ 1x ÜRET</button>
+                        <button class="btn-action" id="btn-manual-produce" style="background: linear-gradient(135deg, #00f2fe, #0284c7); color:#000; flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                            </svg>
+                            1x ÜRET
+                        </button>
                         <button class="btn-action" onclick="batchProduce(10)" style="background: rgba(0,242,254,0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); flex: 1; padding: 8px; font-size: 11px;">10x</button>
                         <button class="btn-action" onclick="batchProduce(50)" style="background: rgba(0,242,254,0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); flex: 1; padding: 8px; font-size: 11px;">50x</button>
                     </div>
 
-                    <button class="btn-action" id="btn-sell-all" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 12px;">💰 TÜM DEPOYU SAT</button>
+                    <button class="btn-action" id="btn-sell-all" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        TÜM DEPOYU SAT
+                    </button>
 
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Montaj Otomasyonu: <span id="display-auto-rate" style="color: #fff; font-weight: bold;">0 / sn</span></div>
-                        <button id="btn-upgrade-auto" class="btn-action" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">BANT EKLE (-$1,000)</button>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Montaj Otomasyonu: <span id="display-auto-rate" style="color: #fff; font-weight: bold;">0 / sn</span></div>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 6px;">İlk bant yatırım ister; her seviye daha pahalı ve daha verimli.</div>
+                        <button id="btn-upgrade-auto" class="btn-action" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">BANT EKLE (-$6,000)</button>
                     </div>
                 </div>
 
                 <!-- Fabrika İstasyonları Kartı -->
                 <div class="factory-card" style="text-align: left;">
-                    <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--accent-blue);">🏭 Fabrika Donanım & Verimlilik İstasyonları</h4>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(0,242,254,0.6));">
+                            <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                            <path d="M17 18h1"></path>
+                            <path d="M12 18h1"></path>
+                            <path d="M7 18h1"></path>
+                        </svg>
+                        <h4 style="margin: 0; font-size: 13px; color: var(--accent-blue);">Fabrika Donanım & Verimlilik İstasyonları</h4>
+                    </div>
                     
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
                             <span>OS İmaj & Test İstasyonu:</span>
                             <span id="display-station-eff" style="color:var(--accent-green); font-weight: bold;">+%0 Değer</span>
                         </div>
-                        <button id="btn-upgrade-station" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">İSTASYONU GELİŞTİR (-$5,000)</button>
+                        <button id="btn-upgrade-station" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">İSTASYONU GELİŞTİR (-$40,000)</button>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
@@ -372,7 +743,7 @@
                             <span>Robotik Montaj Kolu:</span>
                             <span id="display-robot-level" style="color:var(--accent-blue); font-weight: bold;">Yok</span>
                         </div>
-                        <button id="btn-upgrade-robot" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ROBOT KOL EKLE (-$12,000)</button>
+                        <button id="btn-upgrade-robot" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ROBOT KOL EKLE (-$100,000)</button>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
@@ -380,13 +751,20 @@
                             <span>Lazer Gravür & Kutu Hattı:</span>
                             <span id="display-packaging-level" style="color:var(--accent-amber); font-weight: bold;">Standart Kutu</span>
                         </div>
-                        <button id="btn-upgrade-packaging" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">LÜKS KUTULAMA KUR (-$18,000)</button>
+                        <button id="btn-upgrade-packaging" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">LÜKS KUTULAMA KUR (-$150,000)</button>
                     </div>
                 </div>
 
                 <!-- Tesis Raporu -->
                 <div class="factory-card" style="text-align: left;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 12px; color: var(--text-muted);">📊 Tesis Performans Raporu</h4>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <h4 style="margin: 0; font-size: 12px; color: var(--text-muted);">Tesis Performans Raporu</h4>
+                    </div>
                     <div style="font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 4px;">
                         <span>Saatlik Üretim Kapasitesi:</span>
                         <span id="display-hourly-capacity" style="color: #fff; font-weight:bold;">0 Adet</span>
@@ -402,46 +780,73 @@
             <!-- SEKME 2: AR-GE VE TASARIM -->
             <div id="tab-rd" class="tab-content">
                 <div class="factory-card" style="text-align: left;">
-                    <h3 style="margin: 0 0 12px 0; text-align: center;">Donanım Mimarisi & Patent</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+                        <h3 style="margin: 0; font-size: 15px;">Donanım Mimarisi & Patent</h3>
+                        <span id="display-rd-tier" style="font-size:10px; color:var(--accent-blue); font-weight:800; border:1px solid rgba(0,242,254,0.3); padding:2px 8px; border-radius:10px; background:rgba(0,242,254,0.1);">Kademe 1 (Giriş)</span>
+                    </div>
+
+                    <!-- Ar-Ge Kilit ve Lisans Durumu -->
+                    <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                        <div style="font-size: 11px; display:flex; justify-content:space-between; margin-bottom: 6px;">
+                            <span>Sonraki Lisans:</span>
+                            <b id="rd-next-tier-name" style="color:var(--accent-amber);">Kademe 2 (Orta Segment)</b>
+                        </div>
+                        <div id="rd-requirements-text" style="font-size: 10px; color: var(--text-muted); line-height: 1.4; margin-bottom: 8px;">
+                            Şartlar: 10.000 Üretim | $300.000 Fon
+                        </div>
+                        <button class="btn-action" id="btn-unlock-tier" onclick="unlockNextRDTier()" style="background:#1e293b; padding:8px; font-size:11px; border:1px solid rgba(255,255,255,0.1);">
+                            KADEME 2 LİSANSINI AL (-$300.000)
+                        </button>
+                    </div>
                     
                     <div style="margin-bottom: 10px;">
                         <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">İşlemci (Yonga Seti)</label>
                         <select id="select-cpu">
-                            <option value="20,40">Dört Çekirdek Standart (+$20)</option>
-                            <option value="60,140">Sekiz Çekirdek Oyun Odaklı (+$60)</option>
-                            <option value="150,380">3nm Yapay Zeka Nöral Çip (+$150)</option>
+                            <option value="20,40,1">Dört Çekirdek Standart (+$20)</option>
+                            <option value="50,110,2">🔒 Altı Çekirdek Gelişmiş Çip (+$50) [K2]</option>
+                            <option value="120,290,3">🔒 Sekiz Çekirdek Performans Serisi (+$120) [K3]</option>
+                            <option value="280,680,4">🔒 4nm Nöral Yapay Zeka İşlemci (+$280) [K4]</option>
+                            <option value="600,1500,5">🔒 2nm Kuantum Klon Yonga (+$600) [K5]</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Ekran Teknolojisi</label>
                         <select id="select-screen">
-                            <option value="15,30">60Hz Standart IPS Panel (+$15)</option>
-                            <option value="45,110">120Hz Canlı OLED Panel (+$45)</option>
-                            <option value="100,260">Katlanabilir Ultra İnce Panel (+$100)</option>
+                            <option value="15,30,1">60Hz Standart IPS Panel (+$15)</option>
+                            <option value="35,85,2">🔒 90Hz Akıcı IPS Ekran (+$35) [K2]</option>
+                            <option value="80,210,3">🔒 120Hz Dinamik OLED Panel (+$80) [K3]</option>
+                            <option value="180,490,4">🔒 Çift Taraflı Esnek Ekran (+$180) [K4]</option>
+                            <option value="400,1100,5">🔒 Holografik Işıklı Matris Ekran (+$400) [K5]</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Kamera Kurulumu</label>
                         <select id="select-camera">
-                            <option value="15,30">Tek Lens Standart Sensör (+$15)</option>
-                            <option value="40,90">Üçlü Yapay Zeka Destekli Lens (+$40)</option>
-                            <option value="110,280">Periskop Optik Yakınlaştırma (+$110)</option>
+                            <option value="15,30,1">Tek Lens Standart Sensör (+$15)</option>
+                            <option value="35,80,2">🔒 Çift Lens Portre Modülü (+$35) [K2]</option>
+                            <option value="90,230,3">🔒 Üçlü Yapay Zeka Destekli Lens (+$90) [K3]</option>
+                            <option value="210,540,4">🔒 200MP Periskop Optik Zoom (+$210) [K4]</option>
+                            <option value="450,1250,5">🔒 Spektral Lazer Sensör Sistemi (+$450) [K5]</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 10px;">
                         <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Kasa Materyali</label>
                         <select id="select-body">
-                            <option value="10,20">Geri Dönüştürülmüş Plastik (+$10)</option>
-                            <option value="35,75">Havacılık Sınıfı Alüminyum (+$35)</option>
-                            <option value="80,200">Dövme Titanyum Çerçeve (+$80)</option>
+                            <option value="10,20,1">Geri Dönüştürülmüş Plastik (+$10)</option>
+                            <option value="30,70,2">🔒 Güçlendirilmiş Polikarbon (+$30) [K2]</option>
+                            <option value="70,180,3">🔒 Havacılık Sınıfı Alüminyum (+$70) [K3]</option>
+                            <option value="160,420,4">🔒 Dövme Titanyum Çerçeve (+$160) [K4]</option>
+                            <option value="350,980,5">🔒 Karbon Nanotüp Zırhlı Kasa (+$350) [K5]</option>
                         </select>
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Batarya Tipi</label>
                         <select id="select-battery">
-                            <option value="10,20">4000 mAh Standart Pil (+$10)</option>
-                            <option value="30,65">5500 mAh Hızlı Şarjlı Pil (+$30)</option>
-                            <option value="70,160">Grafen Katı Hal Batarya (+$70)</option>
+                            <option value="10,20,1">4000 mAh Standart Pil (+$10)</option>
+                            <option value="25,60,2">🔒 4800 mAh Hızlı Şarjlı Pil (+$25) [K2]</option>
+                            <option value="60,150,3">🔒 6000 mAh Ultra Kapasiteli Pil (+$60) [K3]</option>
+                            <option value="140,360,4">🔒 Lityum-Kükürt Batarya (+$140) [K4]</option>
+                            <option value="300,850,5">🔒 Grafen Katı Hal Sonsuz Güç Hücresi (+$300) [K5]</option>
                         </select>
                     </div>
 
@@ -450,7 +855,7 @@
                             <span>Temel Birim Maliyet:</span> <span id="preview-cost" style="color: #ef4444;">-$145</span>
                         </div>
                         <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <span>Piyasa Taban Değeri:</span> <span id="preview-price" style="color: var(--accent-green);">+$310</span>
+                            <span>Piyasa Taban Değeri:</span> <span id="preview-price" style="color: var(--accent-green);">+$260</span>
                         </div>
                         <div style="font-size: 11px; color: var(--accent-amber);" id="patent-badge">Patent Uygunluğu: Standart Cihaz</div>
                     </div>
@@ -463,14 +868,14 @@
                             <span>Özel CTS OS İşletim Sistemi:</span>
                             <span id="os-status" style="color:var(--accent-green); font-weight:bold;">Açık Kaynak (v0)</span>
                         </div>
-                        <button id="btn-upgrade-os" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ÖZEL OS GELİŞTİR (-$20,000)</button>
+                        <button id="btn-upgrade-os" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ÖZEL OS GELİŞTİR (-$100.000)</button>
                     </div>
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
                             <span>Yapay Zeka (AI) Asistan:</span>
                             <span id="ai-status" style="color:var(--text-muted); font-weight:bold;">Yok</span>
                         </div>
-                        <button id="btn-upgrade-ai" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">YAPAY ZEKA ENTEGRE ET (-$45,000)</button>
+                        <button id="btn-upgrade-ai" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">YAPAY ZEKA ENTEGRE ET (-$250.000)</button>
                     </div>
                 </div>
             </div>
@@ -479,9 +884,17 @@
             <div id="tab-market" class="tab-content">
                 <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; text-align: center;">Kıtalardaki pazar payın küresel satış fiyatına doğrudan çarpan ekler.</div>
                 
+                <!-- 1. Kuzey Amerika -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌎 Kuzey Amerika</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(0,242,254,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M7 6s2 1 3 3-1 3-1 5 2 4 4 4"></path>
+                                <path d="M15 5c1 1.5.5 3.5-.5 4.5s-2 2-1.5 3.5"></path>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Kuzey Amerika</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Gelir Çarpanı: 1.5x</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-NA"></div></div>
@@ -494,9 +907,17 @@
                     </div>
                 </div>
 
+                <!-- 2. Avrupa -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌍 Avrupa</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(16,185,129,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9 4.5c.5 1.5-.5 2.5 1 4s3.5 1.5 3.5 3.5-2 3.5-.5 5"></path>
+                                <circle cx="16" cy="8" r="1" fill="#10b981"></circle>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Avrupa</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Gelir Çarpanı: 1.3x</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-EU"></div></div>
@@ -509,9 +930,17 @@
                     </div>
                 </div>
 
+                <!-- 3. Asya -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌏 Asya</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(245,158,11,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M11 5c2 2 4 1 5 3s-1 3.5 1 5 1.5 3.5 0 4.5"></path>
+                                <path d="M7 14c2-1 3 .5 4 0"></path>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Asya</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Devasa Hacim</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-ASIA"></div></div>
@@ -524,9 +953,16 @@
                     </div>
                 </div>
 
+                <!-- 4. Güney Amerika -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌎 Güney Amerika</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(139,92,246,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M10 7c2-1 4 0 5 2s-1 4-2 6-1 4-3 5"></path>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Güney Amerika</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Gelişmekte Olan</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-SA"></div></div>
@@ -539,9 +975,16 @@
                     </div>
                 </div>
 
+                <!-- 5. Afrika -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌍 Afrika</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(249,115,22,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M8 8c2-2 5-2 6 0s1 4 3 5-1 4-2 6-3 1-4-2"></path>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Afrika</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Yüksek Büyüme Hızı</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-AF"></div></div>
@@ -554,9 +997,18 @@
                     </div>
                 </div>
 
+                <!-- 6. Okyanusya -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">🌏 Okyanusya</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(56,189,248,0.6));">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 11c1.5-1 3-.5 3.5 1s-1.5 3-3 2.5"></path>
+                                <circle cx="17" cy="15" r="1.2" fill="#38bdf8"></circle>
+                                <circle cx="8" cy="10" r="1" fill="#38bdf8"></circle>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Okyanusya</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--text-muted);">Yüksek Alım Gücü</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-OC"></div></div>
@@ -569,9 +1021,20 @@
                     </div>
                 </div>
 
+                <!-- 7. Antarktika -->
                 <div class="factory-card" style="text-align: left;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <h3 style="margin: 0; font-size: 14px;">❄️ Antarktika</h3>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(224,242,254,0.7));">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="m20 16-4-4 4-4"></path>
+                                <path d="m4 8 4 4-4 4"></path>
+                                <path d="m16 4-4 4-4-4"></path>
+                                <path d="m8 20 4-4 4 4"></path>
+                            </svg>
+                            <h3 style="margin: 0; font-size: 14px;">Antarktika</h3>
+                        </div>
                         <span style="font-size:10px; color:var(--accent-blue);">Kutup Araştırma Ağı</span>
                     </div>
                     <div class="progress-bg"><div class="progress-fill" id="share-bar-AN"></div></div>
@@ -588,21 +1051,36 @@
             <!-- SEKME 4: YÖNETİM -->
             <div id="tab-management" class="tab-content">
                 <div class="factory-card" style="text-align: left;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: var(--accent-amber);">📦 Depo & Lojistik Ağı</h3>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(245,158,11,0.5));">
+                            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                            <path d="m3.3 7 8.7 5 8.7-5"></path>
+                            <path d="M12 22V12"></path>
+                        </svg>
+                        <h3 style="margin: 0; font-size: 14px; color: var(--accent-amber);">Depo & Lojistik Ağı</h3>
+                    </div>
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
                         <div style="font-size: 12px; margin-bottom: 8px;">Maksimum Depo: <span id="manage-stock-limit" style="color: #fff; font-weight:bold;">500</span></div>
-                        <button class="btn-action" id="btn-upgrade-warehouse" style="background: var(--accent-amber); color: #000;">DEPO GENİŞLET (-$2,500)</button>
+                        <button class="btn-action" id="btn-upgrade-warehouse" style="background: var(--accent-amber); color: #000;">DEPO GENİŞLET (-$8,000)</button>
                     </div>
                 </div>
 
                 <div class="factory-card" style="text-align: left;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: var(--accent-purple);">👥 Kurumsal Personel Departmanı</h3>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(139,92,246,0.5));">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <h3 style="margin: 0; font-size: 14px; color: var(--accent-purple);">Kurumsal Personel Departmanı</h3>
+                    </div>
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                         <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
                             <span>Montaj Mühendisleri (Hız + Maliyet):</span>
                             <span id="display-engineers" style="color:#fff; font-weight:bold;">0 Ekip</span>
                         </div>
-                        <button id="btn-hire-engineer" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">MÜHENDİS AL (-$8,000)</button>
+                        <button id="btn-hire-engineer" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">MÜHENDİS AL (-$35,000)</button>
                     </div>
 
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
@@ -615,7 +1093,17 @@
                 </div>
 
                 <div class="factory-card" style="text-align: left;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #ef4444;">🏦 Banka, Tahvil & Kredi</h3>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(239,68,68,0.5));">
+                            <line x1="3" y1="21" x2="21" y2="21"></line>
+                            <line x1="6" y1="18" x2="6" y2="11"></line>
+                            <line x1="10" y1="18" x2="10" y2="11"></line>
+                            <line x1="14" y1="18" x2="14" y2="11"></line>
+                            <line x1="18" y1="18" x2="18" y2="11"></line>
+                            <polygon points="12 2 20 7 4 7"></polygon>
+                        </svg>
+                        <h3 style="margin: 0; font-size: 14px; color: #ef4444;">Banka, Tahvil & Kredi</h3>
+                    </div>
                     <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Nakit sıkışıklığında banka hattını kullan (Faiz: %5/dk)</div>
                         <button class="btn-action" id="btn-take-loan" style="background: #1e293b; padding: 8px; font-size: 11px; margin-bottom: 6px;">$50,000 KREDİ ÇEK</button>
@@ -627,7 +1115,7 @@
                             <span>Holding Şirket Tahvili (Pasif Faiz):</span>
                             <span id="display-bonds" style="color:var(--accent-green); font-weight:bold;">$0 Tahvil</span>
                         </div>
-                        <button id="btn-buy-bond" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">$10,000 TAHVİL AL (+$50/sn)</button>
+                        <button id="btn-buy-bond" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">$10,000 TAHVİL AL (+$15/sn)</button>
                     </div>
                 </div>
             </div>
@@ -638,32 +1126,95 @@
                     <h3 style="margin: 0 0 4px 0; color: var(--accent-blue); text-align:center;">Tycoon Mağazası</h3>
                     <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom: 15px;">Özel lisanslar, holding yatırımları ve sponsorlar</p>
 
-                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
-                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-green); margin-bottom: 4px;">🎬 Sponsor Hibe Fonu</div>
+                    <div class="premium-card" style="padding: 14px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="position:relative; z-index:1;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                                <div class="premium-title" style="font-weight: 900; font-size: 14px; display:flex; align-items:center; gap:6px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px rgba(251,191,36,0.6));">
+                                        <polygon points="2 4 5 20 19 20 22 4 15 10 12 2 9 10 2 4"></polygon>
+                                    </svg>
+                                    GOLD TYCOON PREMIUM
+                                </div>
+                                <span id="premium-status" style="font-size: 9px; color: #fde68a; font-weight: 800;">30 GÜNLÜK ÜYELİK</span>
+                            </div>
+                            <div style="font-size: 11px; color: #fde68a; margin-bottom: 8px;">Fabrikanın altın çağını başlatır.</div>
+                            <div style="font-size: 10px; color: #fef3c7; line-height: 1.6; margin-bottom: 10px;">✦ Oto-Lojistik Satış Protokolü (Çevrimdışı Otomatik Satış)<br>✦ Satış geliri +%12 &nbsp; ✦ Üretim hızı +%15<br>✦ Birim maliyet -%10 &nbsp; ✦ Depo +250 &nbsp; ✦ Çevrimdışı üretim +%50</div>
+                            <button class="btn-action" id="btn-premium" onclick="buyIAP('premium')" style="background: linear-gradient(135deg, #fde68a, #f59e0b); color: #111827; font-size: 12px;">PREMİUM'U AKTİFLEŞTİR (₺79.99 / AY)</button>
+                        </div>
+                    </div>
+
+                    <div id="reward-ad-card" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-green); margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="20" height="15" x="2" y="7" rx="2" ry="2"></rect>
+                                <polyline points="17 2 12 7 7 2"></polyline>
+                            </svg>
+                            Sponsor Hibe Fonu
+                        </div>
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Kasana anında hibe destek fonu aktar.</div>
                         <button class="btn-action" onclick="watchRewardAd()" style="background: var(--accent-green); color: #000; font-size: 12px;">İZLE (+$25,000)</button>
                     </div>
 
+                    <div id="remove-ads-card" style="background: rgba(148,163,184,0.08); border: 1px solid #64748b; padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: #e2e8f0; margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                            </svg>
+                            Reklamları Kaldır
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Sponsor hibe ekranını tamamen kaldır; oyun akışın kesilmesin.</div>
+                        <button class="btn-action" id="btn-remove-ads" onclick="buyIAP('removeAds')" style="background: #475569; color: #fff; font-size: 12px;">SATIN AL (₺39.99)</button>
+                    </div>
+
                     <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid var(--accent-blue); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
-                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-blue); margin-bottom: 4px;">⚡ 2X Montaj Hızı</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Tüm bant üretim kapasitesini 2 katına çıkarır.</div>
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-blue); margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            %25 Montaj Hızı
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Tüm bant üretim kapasitesini 10 dakika boyunca %25 artırır.</div>
                         <button class="btn-action" onclick="buyIAP('speed')" style="background: var(--accent-blue); color: #000; font-size: 12px;">SATIN AL (₺39.99)</button>
                     </div>
 
                     <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid var(--accent-amber); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
-                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-amber); margin-bottom: 4px;">🕵️ Endüstriyel Casusluk Lisansı</div>
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-amber); margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12h20"></path>
+                                <path d="M20 12v8H4v-8"></path>
+                                <path d="m4 4 16 16"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 3a9 9 0 0 1 9 9"></path>
+                            </svg>
+                            Endüstriyel Casusluk Lisansı
+                        </div>
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Rakiplerin pazar saldırılarını %100 oranında engeller.</div>
                         <button class="btn-action" onclick="buyIAP('spy')" style="background: var(--accent-amber); color: #000; font-size: 12px;">LİSANS AL (₺59.99)</button>
                     </div>
 
                     <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid var(--accent-purple); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
-                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-purple); margin-bottom: 4px;">👑 VIP Holding Paketi</div>
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-purple); margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14"></path>
+                            </svg>
+                            VIP Holding Paketi
+                        </div>
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">$500,000 nakit ve sınırsız +5,000 depo kapasitesi.</div>
                         <button class="btn-action" onclick="buyIAP('vip')" style="background: var(--accent-purple); color: #fff; font-size: 12px;">SATIN AL (₺99.99)</button>
                     </div>
 
                     <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px;">
-                        <div style="font-weight: 800; font-size: 13px; color: #fff; margin-bottom: 4px;">☕ Geliştiriciye Kahve Ismarla</div>
+                        <div style="font-weight: 800; font-size: 13px; color: #fff; margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                                <line x1="6" y1="12" x2="6" y2="4"></line>
+                                <line x1="10" y1="12" x2="10" y2="4"></line>
+                                <line x1="14" y1="12" x2="14" y2="4"></line>
+                            </svg>
+                            Geliştiriciye Kahve Ismarla
+                        </div>
                         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Cyber Tycoon Studio'ya bağımsız oyun desteği sağla.</div>
                         <button class="btn-action" onclick="buyIAP('coffee')" style="background: #334155; color: #fff; font-size: 12px;">ISMARLA (₺19.99)</button>
                     </div>
@@ -674,11 +1225,53 @@
 
         <!-- 6. ALT NAVİGASYON -->
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('factory', this)"><span class="nav-icon">🏭</span>Fabrika</div>
-            <div class="nav-item" onclick="switchTab('rd', this)"><span class="nav-icon">🔬</span>Ar-Ge</div>
-            <div class="nav-item" onclick="switchTab('market', this)"><span class="nav-icon">🌍</span>Pazar</div>
-            <div class="nav-item" onclick="switchTab('management', this)"><span class="nav-icon">💼</span>Yönetim</div>
-            <div class="nav-item" onclick="switchTab('shop', this)"><span class="nav-icon">💎</span>Mağaza</div>
+            <div class="nav-item active" onclick="switchTab('factory', this)">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 3px; display: block;">
+                    <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                    <path d="M17 18h1"></path>
+                    <path d="M12 18h1"></path>
+                    <path d="M7 18h1"></path>
+                </svg>
+                Fabrika
+            </div>
+
+            <div class="nav-item" onclick="switchTab('rd', this)">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 3px; display: block;">
+                    <path d="M6 18h8"></path>
+                    <path d="M3 22h18"></path>
+                    <path d="M14 22a7 7 0 1 0 0-14h-1"></path>
+                    <path d="M9 14h2"></path>
+                    <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"></path>
+                    <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"></path>
+                </svg>
+                Ar-Ge
+            </div>
+
+            <div class="nav-item" onclick="switchTab('market', this)">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 3px; display: block;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                Pazar
+            </div>
+
+            <div class="nav-item" onclick="switchTab('management', this)">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 3px; display: block;">
+                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                Yönetim
+            </div>
+
+            <div class="nav-item" onclick="switchTab('shop', this)">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 3px; display: block;">
+                    <path d="M6 3h12l4 6-10 13L2 9Z"></path>
+                    <path d="M11 3 8 9l4 13 4-13-3-6"></path>
+                    <path d="M2 9h20"></path>
+                </svg>
+                Mağaza
+            </div>
         </div>
 
     </div>
@@ -745,40 +1338,72 @@
             }
         }
 
+        const BALANCE_CONFIG = {
+            firstAutomationCost: 6000,
+            automationCostGrowth: 1.85,
+            warehouseCapacityStep: 250,
+            warehouseCostGrowth: 2.05,
+            productionTickMs: 1000,
+            manualCooldownMs: 280,
+            hypeMultiplier: 1.35,
+            hypeDurationSeconds: 45
+        };
+
+        const PREMIUM_CONFIG = {
+            monthlyPrice: '₺79.99',
+            durationMs: 30 * 24 * 60 * 60 * 1000,
+            sellMultiplier: 1.12,
+            productionMultiplier: 1.15,
+            costMultiplier: 0.90,
+            storageBonus: 250,
+            offlineMultiplier: 1.50
+        };
+
         // --- OYUN DEĞİŞKENLERİ ---
         let money = 50000; 
         let stock = 0; 
         let maxStock = 500;
         let baseCostPerUnit = 145; 
-        let baseSellPrice = 310;
+        let baseSellPrice = 260;
         let autoProduceRate = 0; 
-        let autoUpgradeCost = 1000; 
-        let warehouseUpgradeCost = 2500;
+        let autoUpgradeCost = BALANCE_CONFIG.firstAutomationCost; 
+        let warehouseUpgradeCost = 8000;
         
         let stationLevel = 1;
-        let stationUpgradeCost = 5000;
+        let stationUpgradeCost = 40000;
         let robotLevel = 0;
-        let robotUpgradeCost = 12000;
+        let robotUpgradeCost = 100000;
         let packagingLevel = 0;
-        let packagingUpgradeCost = 18000;
+        let packagingUpgradeCost = 150000;
 
         let engineerCount = 0;
-        let engineerCost = 8000;
+        let engineerCost = 35000;
         let hasMarketer = false;
         let marketerCost = 25000;
         let bondInvestment = 0;
         let hasSpyLicense = false;
 
+        let rdUnlockedTier = 1;
+        let baseLaunchCost = 50000;
+        let launchCount = 0;
+        let currentDesignSignature = "";
+
         let patentCount = 0;
         let patentBonusMultiplier = 1;
         let osLevel = 0;
-        let osUpgradeCost = 20000;
+        let osUpgradeCost = 100000;
         let aiLevel = 0;
-        let aiUpgradeCost = 45000;
+        let aiUpgradeCost = 250000;
         
         let chipCrisisMultiplier = 1;
         let debt = 0; 
         let speedMultiplier = 1; 
+        let speedBoostExpiresAt = 0;
+        let premiumUntil = 0;
+        let isPremium = false;
+        let adsRemoved = false;
+        let productionBuffer = 0;
+        let lastManualProduceAt = 0;
         let vibrationEnabled = true;
 
         let markets = {
@@ -787,10 +1412,63 @@
 
         let stats = { totalProduced: 0, peakWealth: 50000, peakMarket: 0, loansTaken: 0 };
         let lastSaveTime = Date.now();
+        let cashHistory = [50000];
+        let activeModalType = null;
 
         let isHypeActive = false;
         let hypeMultiplier = 1;
         let hypeTimeRemaining = 0;
+
+        function refreshPremiumStatus() {
+            isPremium = premiumUntil > Date.now();
+            document.getElementById('app-container').classList.toggle('premium-active', isPremium);
+            applyPremiumSplashTheme();
+            const badge = document.getElementById('premium-badge');
+            const status = document.getElementById('premium-status');
+            const button = document.getElementById('btn-premium');
+            if (badge) badge.title = isPremium ? 'Gold Tycoon Premium aktif' : '';
+            if (status) status.innerText = isPremium ? `AKTİF • ${Math.ceil((premiumUntil - Date.now()) / 86400000)} GÜN` : '30 GÜNLÜK ÜYELİK';
+            if (button) {
+                button.innerText = isPremium ? 'PREMİUM AKTİF • SÜREYİ UZAT' : `PREMİUM'U AKTİFLEŞTİR (${PREMIUM_CONFIG.monthlyPrice} / AY)`;
+                button.style.opacity = isPremium ? '0.82' : '1';
+            }
+            refreshAdStatus();
+        }
+
+        function refreshAdStatus() {
+            const adCard = document.getElementById('reward-ad-card');
+            const removeAdsButton = document.getElementById('btn-remove-ads');
+            if (adCard) adCard.style.display = adsRemoved ? 'none' : 'block';
+            if (removeAdsButton) {
+                removeAdsButton.innerText = adsRemoved ? 'REKLAMLAR KALDIRILDI' : 'SATIN AL (₺39.99)';
+                removeAdsButton.disabled = adsRemoved;
+                removeAdsButton.style.opacity = adsRemoved ? '0.65' : '1';
+            }
+        }
+
+        function applyPremiumSplashTheme() {
+            const color = isPremium ? '#fbbf24' : '#00f2fe';
+            document.querySelectorAll('#particle-container > div').forEach(particle => {
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 8px ${color}`;
+            });
+            const logo = document.getElementById('intro-logo');
+            if (logo) {
+                logo.style.color = isPremium ? '#fef3c7' : '#fff';
+                logo.style.textShadow = isPremium ? '0 0 28px rgba(251,191,36,0.9)' : '';
+            }
+        }
+
+        function getStorageLimit() {
+            return maxStock + (isPremium ? PREMIUM_CONFIG.storageBonus : 0);
+        }
+
+        function getEffectiveRate() {
+            const baseRate = autoProduceRate + (engineerCount * 1) + (robotLevel * 3);
+            const premiumRate = isPremium ? PREMIUM_CONFIG.productionMultiplier : 1;
+            const boostRate = Date.now() < speedBoostExpiresAt ? speedMultiplier : 1;
+            return Math.round(baseRate * premiumRate * boostRate * 100) / 100;
+        }
 
         function showModal(title, text, type = 'info', onConfirm = null) {
             document.getElementById('modal-title').innerText = title;
@@ -802,13 +1480,14 @@
                 const btnCancel = document.createElement('button');
                 btnCancel.className = 'btn-action'; btnCancel.style.background = '#334155'; btnCancel.style.width = '48%';
                 btnCancel.innerText = 'İPTAL';
-                btnCancel.onclick = () => { playSound('click'); document.getElementById('custom-modal-overlay').style.display = 'none'; };
+                btnCancel.onclick = () => { playSound('click'); activeModalType = null; document.getElementById('custom-modal-overlay').style.display = 'none'; };
                 
                 const btnOk = document.createElement('button');
                 btnOk.className = 'btn-action'; btnOk.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)'; btnOk.style.width = '48%';
                 btnOk.innerText = 'ONAYLA';
                 btnOk.onclick = () => {
                     playSound('click');
+                    activeModalType = null;
                     document.getElementById('custom-modal-overlay').style.display = 'none';
                     if (onConfirm) onConfirm();
                 };
@@ -818,14 +1497,135 @@
                 const btnOk = document.createElement('button');
                 btnOk.className = 'btn-action'; btnOk.style.background = 'linear-gradient(135deg, #00f2fe, #0284c7)';
                 btnOk.innerText = 'TAMAM';
-                btnOk.onclick = () => { playSound('click'); document.getElementById('custom-modal-overlay').style.display = 'none'; };
+                btnOk.onclick = () => { playSound('click'); activeModalType = null; document.getElementById('custom-modal-overlay').style.display = 'none'; };
                 btnArea.appendChild(btnOk);
             }
             document.getElementById('custom-modal-overlay').style.display = 'flex';
         }
 
+        // --- CANLI KASA VE DEPO POP-UP SİSTEMİ ---
+        function renderCashModalContent() {
+            let effectiveRate = getEffectiveRate();
+            let currentCost = getEffectiveUnitCost();
+            let costPerSec = effectiveRate * currentCost;
+            let passiveSubIncome = (osLevel * 60) + (aiLevel * 180) + (bondInvestment * 0.0015);
+            let upkeepCost = (engineerCount * 85) + (robotLevel * 140) + (stationLevel * 30);
+            let netCashFlow = passiveSubIncome - costPerSec - upkeepCost;
+
+            let unitSellPrice = getActualSellPrice();
+            let stockMarketValue = Math.floor(stock * unitSellPrice);
+            let unitProfit = unitSellPrice - currentCost;
+            let profitMargin = Math.max(0, Math.floor((unitProfit / unitSellPrice) * 100));
+
+            let minVal = Math.min(...cashHistory);
+            let maxVal = Math.max(...cashHistory);
+            if (minVal === maxVal) { minVal -= 500; maxVal += 500; }
+            let range = (maxVal - minVal) || 1;
+            let width = 280;
+            let height = 70;
+
+            let points = cashHistory.map((val, idx) => {
+                let x = (idx / (cashHistory.length - 1 || 1)) * width;
+                let y = height - ((val - minVal) / range) * (height - 18) - 9;
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+
+            let isCashPositive = netCashFlow >= 0;
+
+            return `
+                <div style="text-align: left; font-size: 11px;">
+                    <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                        <div style="display:flex; justify-content:space-between; font-size: 10px; margin-bottom: 6px;">
+                            <span style="color: var(--text-muted);">Fabrika Finans Dalgalanması</span>
+                            <span style="color: ${stockMarketValue > 0 ? 'var(--accent-green)' : 'var(--text-muted)'}; font-weight: 800;">
+                                ${stockMarketValue > 0 ? '📦 DEPO DEĞERİ: +$' + stockMarketValue.toLocaleString() : 'DEPO BOŞ'}
+                            </span>
+                        </div>
+                        <svg width="100%" height="70" viewBox="0 0 ${width} ${height}" style="overflow: visible;">
+                            <line x1="0" y1="${height / 2}" x2="${width}" y2="${height / 2}" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3" />
+                            <polyline fill="none" stroke="${isCashPositive ? 'var(--accent-green)' : '#00f2fe'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${points}" style="filter: drop-shadow(0 0 6px rgba(0,242,254,0.6));" />
+                        </svg>
+                        <div style="font-size: 9px; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between;">
+                            <span>Montaj Harcaması</span>
+                            <span style="color: var(--accent-amber);">Satış Yapıldığında Sıçrar</span>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 6px; padding: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-muted);">Birim Kâr Marjı:</span>
+                            <b style="color: var(--accent-green);">+$${unitProfit.toLocaleString()} (%${profitMargin})</b>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-muted);">Depodaki Potansiyel Ciro:</span>
+                            <b style="color: #00f2fe;">+$${stockMarketValue.toLocaleString()}</b>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="color: var(--text-muted);">Anlık Üretim Akışı:</span>
+                        <b style="color: ${isCashPositive ? 'var(--accent-green)' : '#ef4444'};">${isCashPositive ? '+' : ''}$${Math.floor(netCashFlow).toLocaleString()}/sn</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="color: var(--text-muted);">Sabit Tesis Giderleri:</span>
+                        <b style="color: #ef4444;">-$${upkeepCost.toLocaleString()}/sn</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="color: var(--text-muted);">Pasif Yazılım Geliri:</span>
+                        <b style="color: var(--accent-green);">+$${Math.floor(passiveSubIncome).toLocaleString()}/sn</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; margin-top: 6px;">
+                        <span style="color: var(--text-muted);">İflas Eşiği (Tasfiye):</span>
+                        <b style="color: #ef4444;">-$100,000</b>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStorageModalContent() {
+            let limit = getStorageLimit();
+            let percent = Math.min(100, Math.floor((stock / limit) * 100));
+            let isNearFull = percent >= 90;
+            let barColor = isNearFull ? '#ef4444' : (percent > 65 ? 'var(--accent-amber)' : 'var(--accent-blue)');
+
+            return `
+                <div style="text-align: left; font-size: 11px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted);">Doluluk Oranı:</span>
+                        <b style="color: ${barColor}; font-size: 13px;">%${percent}</b>
+                    </div>
+                    <div class="progress-bg" style="height: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.5);">
+                        <div class="progress-fill" style="width: ${percent}%; background: ${barColor}; box-shadow: 0 0 10px ${barColor}; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted);">Stoktaki Telefon:</span>
+                        <b>${Math.floor(stock).toLocaleString()} Adet</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="color: var(--text-muted);">Kalan Boş Alan:</span>
+                        <b style="color: var(--accent-green);">${Math.max(0, limit - Math.floor(stock)).toLocaleString()} Adet</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: var(--text-muted);">Toplam Depo Kapasitesi:</span>
+                        <b>${limit.toLocaleString()} Adet</b>
+                    </div>
+                    ${isNearFull ? '<div style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; border-radius: 6px; padding: 8px; color: #fca5a5; font-size: 10px; line-height: 1.4;">⚠️ <b>UYARI:</b> Depo doluluğu %90 eşiğini aştı! Taşma cezası kesiliyor. Fazla stokları satın!</div>' : '<div style="color: var(--accent-green); font-size: 10px;">✓ Lojistik akışı normal seyrediyor. Taşma riski yok.</div>'}
+                </div>
+            `;
+        }
+
+        function openCashModal() {
+            playSound('click');
+            activeModalType = 'cash';
+            showModal("ŞİRKET KASASI & FİNANS", renderCashModalContent(), "info");
+        }
+
+        function openStorageModal() {
+            playSound('click');
+            activeModalType = 'storage';
+            showModal("DEPO YÖNETİMİ & DOLULUK", renderStorageModalContent(), "info");
+        }
+
         // =========================================================
-        // HİBRİT KAYIT VE SENKRONİZASYON
+        // HİBRİT KAYIT VE ÇEVRİMDIŞI AKILLI SİMÜLASYON
         // =========================================================
         function applyDataToGame(d) {
             if (!d) return;
@@ -848,13 +1648,22 @@
             hasMarketer = d.hasMarketer ?? hasMarketer;
             bondInvestment = d.bondInvestment ?? bondInvestment;
             hasSpyLicense = d.hasSpyLicense ?? hasSpyLicense;
+            rdUnlockedTier = d.rdUnlockedTier ?? rdUnlockedTier;
+            launchCount = d.launchCount ?? launchCount;
+            currentDesignSignature = d.currentDesignSignature || "";
             patentCount = d.patentCount ?? patentCount;
             patentBonusMultiplier = d.patentBonusMultiplier ?? patentBonusMultiplier;
             osLevel = d.osLevel ?? osLevel;
             aiLevel = d.aiLevel ?? aiLevel;
             debt = d.debt ?? debt;
+            premiumUntil = d.premiumUntil ?? premiumUntil;
+            adsRemoved = d.adsRemoved ?? adsRemoved;
+            speedBoostExpiresAt = d.speedBoostExpiresAt ?? speedBoostExpiresAt;
+            speedMultiplier = d.speedMultiplier ?? speedMultiplier;
             if (d.markets) markets = Object.assign(markets, d.markets);
             if (d.stats) stats = Object.assign(stats, d.stats);
+
+            refreshPremiumStatus();
             updateUI();
         }
 
@@ -867,8 +1676,9 @@
                 stationLevel, stationUpgradeCost, robotLevel, robotUpgradeCost,
                 packagingLevel, packagingUpgradeCost,
                 engineerCount, engineerCost, hasMarketer, bondInvestment, hasSpyLicense,
+                rdUnlockedTier, launchCount, currentDesignSignature,
                 patentCount, patentBonusMultiplier, osLevel, aiLevel,
-                debt, markets, stats,
+                debt, premiumUntil, adsRemoved, speedBoostExpiresAt, speedMultiplier, markets, stats,
                 lastActive: Date.now()
             };
 
@@ -896,6 +1706,73 @@
         if (cachedSave) {
             try { applyDataToGame(JSON.parse(cachedSave)); } catch(e) {}
         }
+        const cachedSettings = localStorage.getItem('pft_settings');
+        if (cachedSettings) {
+            try {
+                const savedSettings = JSON.parse(cachedSettings);
+                soundEnabled = savedSettings.soundEnabled ?? soundEnabled;
+                vibrationEnabled = savedSettings.vibrationEnabled ?? vibrationEnabled;
+            } catch(e) {}
+        }
+
+        function simulateOfflineProgress(secondsOffline) {
+            let effectiveRate = getEffectiveRate();
+            if (effectiveRate <= 0) return;
+
+            let unitCost = getEffectiveUnitCost();
+            let unitSellPrice = getActualSellPrice();
+            let upkeepPerSec = (engineerCount * 85) + (robotLevel * 140) + (stationLevel * 30);
+            let passiveSubPerSec = (osLevel * 60) + (aiLevel * 180) + (bondInvestment * 0.0015);
+            
+            // Oto-Lojistik satış avantajı sadece Premium üyelere özeldir
+            let canAutoSell = isPremium;
+
+            let totalProducedInOffline = 0;
+            let totalSoldCash = 0;
+            let storageLimit = getStorageLimit();
+
+            let stepSeconds = Math.min(secondsOffline, 28800); // Max 8 saat
+            for (let t = 0; t < stepSeconds; t += 10) {
+                let chunkTime = 10;
+                
+                money += (passiveSubPerSec - upkeepPerSec) * chunkTime;
+
+                let potentialProduce = effectiveRate * chunkTime;
+                let availableSpace = storageLimit - stock;
+                let produceAmount = Math.min(potentialProduce, availableSpace);
+
+                // Güvenlik Marjı: Para $5.000 altına düşerse iflası önlemek için üretimi durdur
+                if (money < 5000) produceAmount = 0;
+
+                let cost = produceAmount * unitCost;
+                if (money >= cost && produceAmount > 0) {
+                    money -= cost;
+                    stock += produceAmount;
+                    totalProducedInOffline += produceAmount;
+                }
+
+                // Premium Oto-Lojistik: Depo %80 dolunca otomatik toptan sat
+                if (canAutoSell && stock >= (storageLimit * 0.8)) {
+                    let earnings = stock * unitSellPrice;
+                    money += earnings;
+                    totalSoldCash += earnings;
+                    stock = 0;
+                }
+            }
+
+            stats.totalProduced += Math.floor(totalProducedInOffline);
+
+            let reportMsg = `⏱️ Geçen Süre: <b>${Math.floor(secondsOffline / 60)} dk</b><br>`;
+            reportMsg += `📦 Üretilen: <b>+${Math.floor(totalProducedInOffline).toLocaleString()} Cihaz</b><br>`;
+            if (canAutoSell && totalSoldCash > 0) {
+                reportMsg += `💰 Oto-Lojistik Satış Geliri: <b style="color:var(--accent-green);">+$${Math.floor(totalSoldCash).toLocaleString()}</b><br>`;
+                reportMsg += `<small style="color:#fbbf24;">Gold Tycoon Premium oto-lojistiği sayesinde fabrikanız hiç durmadı ve kasası büyüdü.</small>`;
+            } else {
+                reportMsg += `<small style="color:var(--text-muted);">Güvenlik marjı ve depo kapasitesi korundu; iflas riski engellendi.</small>`;
+            }
+
+            showModal("HOŞ GELDİNİZ!", reportMsg, "info");
+        }
 
         function loadCloudData(uid) {
             database.ref('phone_factory_saves/' + uid).once('value').then((snapshot) => {
@@ -904,22 +1781,10 @@
                     applyDataToGame(d);
                     localStorage.setItem('pft_local_save', JSON.stringify(d));
 
-                    if (d.lastActive && autoProduceRate > 0) {
+                    if (d.lastActive && getEffectiveRate() > 0) {
                         let secondsOffline = Math.min(86400, Math.floor((Date.now() - d.lastActive) / 1000));
                         if (secondsOffline > 30) {
-                            let potentialProduce = secondsOffline * autoProduceRate;
-                            let availableSpace = maxStock - stock;
-                            let actualOfflineProduce = Math.min(potentialProduce, availableSpace);
-                            let unitCost = getEffectiveUnitCost();
-                            let maxAffordable = Math.floor(money / unitCost);
-                            actualOfflineProduce = Math.min(actualOfflineProduce, maxAffordable);
-
-                            if (actualOfflineProduce > 0) {
-                                money -= (actualOfflineProduce * unitCost);
-                                stock += actualOfflineProduce;
-                                stats.totalProduced += actualOfflineProduce;
-                                showModal("HOŞ GELDİNİZ!", `Çevrimdışıyken fabrikalarınız çalışmaya devam etti.<br><br>⏱️ Geçen Süre: <b>${Math.floor(secondsOffline / 60)} dk</b><br>📦 Üretilen: <b>+${actualOfflineProduce} Telefon</b>`, "info");
-                            }
+                            simulateOfflineProgress(secondsOffline);
                         }
                     }
                     updateUI();
@@ -927,35 +1792,52 @@
             });
         }
 
-        // --- GERÇEK FİZİKSEL KONVEYÖR ANİMASYON MOTORU ---
-        // Sadece gerçek üretim yapıldığında ekranda kayar, boşta durur
+        // --- GERÇEK FİZİKSEL KONVEYÖR MOTORU ---
         function spawnPhoneOnConveyor() {
             const stage = document.getElementById('conveyor-stage');
             if (!stage) return;
 
+            stage.classList.add('active');
+            clearTimeout(stage._inactiveTimer);
+            stage._inactiveTimer = setTimeout(() => stage.classList.remove('active'), 1500);
+
             const phone = document.createElement('div');
-            phone.innerText = '📱';
+            phone.className = 'conveyor-phone';
+            phone.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 6px rgba(0,242,254,0.8));">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" fill="rgba(15,23,42,0.8)"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5"></line>
+                    <line x1="9" y1="5" x2="15" y2="5" stroke-width="1.5"></line>
+                </svg>
+            `;
             phone.style.cssText = `
                 position: absolute;
                 left: -25px;
-                font-size: 20px;
                 top: 13px;
                 transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
                 z-index: 1;
                 pointer-events: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             `;
             stage.appendChild(phone);
 
-            // Cihazı bant boyunca kutuya doğru kaydır
             setTimeout(() => {
                 phone.style.transform = `translateX(${stage.clientWidth - 20}px) scale(0.9)`;
             }, 20);
 
-            // Depo kutusuna girdiğinde kaybolsun
             setTimeout(() => {
                 phone.style.opacity = '0';
                 setTimeout(() => { if (phone.parentNode) phone.parentNode.removeChild(phone); }, 200);
             }, 820);
+
+            const toast = document.getElementById('production-toast');
+            if (toast) {
+                toast.classList.remove('show');
+                void toast.offsetWidth;
+                toast.classList.add('show');
+            }
         }
 
         function triggerAssemblyProgress() {
@@ -963,21 +1845,75 @@
             fill.style.transition = 'none';
             fill.style.width = '0%';
             setTimeout(() => {
-                fill.style.transition = 'width 0.25s ease-out';
-                fill.style.width = '100%';
-                setTimeout(() => { fill.style.width = '0%'; }, 250);
+                 fill.style.transition = 'width 0.9s ease-out';
+                 fill.style.width = '100%';
+                 setTimeout(() => { fill.style.width = '0%'; }, 900);
             }, 10);
         }
 
-        // --- SİNEMATİK AÇILIŞ VE DİNLENME ---
+        // --- İFLAS VE TASFİYE DENETİMİ ---
+        function checkBankruptcy(reason) {
+            if (money <= -100000 || debt >= 500000) {
+                document.getElementById('bankruptcy-reason').innerHTML = reason;
+                document.getElementById('bankrupt-final-cash').innerText = '$' + Math.floor(money).toLocaleString();
+                document.getElementById('bankrupt-final-debt').innerText = '$' + Math.floor(debt).toLocaleString();
+                document.getElementById('bankrupt-total-produced').innerText = stats.totalProduced.toLocaleString();
+                
+                document.getElementById('bankruptcy-overlay').style.display = 'flex';
+                playSound('hype');
+                return true;
+            }
+            return false;
+        }
+
+        function restartAfterBankruptcy() {
+            playSound('upgrade');
+            document.getElementById('bankruptcy-overlay').style.display = 'none';
+
+            money = 50000;
+            stock = 0;
+            debt = 0;
+            autoProduceRate = 0;
+            autoUpgradeCost = BALANCE_CONFIG.firstAutomationCost;
+            stationLevel = 1;
+            stationUpgradeCost = 40000;
+            robotLevel = 0;
+            robotUpgradeCost = 100000;
+            packagingLevel = 0;
+            packagingUpgradeCost = 150000;
+            engineerCount = 0;
+            engineerCost = 35000;
+            hasMarketer = false;
+            bondInvestment = 0;
+            rdUnlockedTier = 1;
+            launchCount = 0;
+            currentDesignSignature = "";
+            cashHistory = [50000];
+            
+            Object.keys(markets).forEach(k => markets[k] = 0);
+
+            [cpuSelect, screenSelect, cameraSelect, bodySelect, batterySelect].forEach(sel => {
+                if (sel) sel.selectedIndex = 0;
+            });
+
+            calculatePreview();
+            updateRDTierUI();
+            updateUI();
+            saveGame();
+            showModal("YENİDEN DOĞUŞ", "Eski şirketiniz tasfiye edildi. Melek yatırımcıların sağladığı <b>$50.000</b> tohum sermayeyle piyasaya geri döndünüz. Bu kez nakit akışınıza dikkat edin!", "info");
+        }
+
+        // --- SİNEMATİK AÇILIŞ ---
         window.addEventListener('load', () => {
             const container = document.getElementById('particle-container');
+            const particleColor = isPremium ? '#fbbf24' : '#00f2fe';
             for (let i = 0; i < 150; i++) {
                 let p = document.createElement('div');
                 let s = Math.random() * 9 + 1;
-                p.style.cssText = `position:absolute; top:50%; left:50%; width:${s}px; height:${s}px; background:#00f2fe; border-radius:50%; --tx:${(Math.random()-0.5)*500}px; --ty:${(Math.random()-0.5)*900}px; --s:${Math.random()*2+0.8}; animation: dustFloat ${Math.random()*1.8+0.8}s forwards; animation-delay: ${Math.random()*0.25}s;`;
+                p.style.cssText = `position:absolute; top:50%; left:50%; width:${s}px; height:${s}px; background:${particleColor}; box-shadow:0 0 8px ${particleColor}; border-radius:50%; --tx:${(Math.random()-0.5)*500}px; --ty:${(Math.random()-0.5)*900}px; --s:${Math.random()*2+0.8}; animation: dustFloat ${Math.random()*1.8+0.8}s forwards; animation-delay: ${Math.random()*0.25}s;`;
                 container.appendChild(p);
             }
+            applyPremiumSplashTheme();
 
             setTimeout(() => { 
                 document.getElementById('intro-logo').style.opacity = '1'; 
@@ -987,7 +1923,14 @@
             auth.onAuthStateChanged((user) => {
                 setTimeout(() => { 
                     document.getElementById('intro-splash-screen').style.opacity = '0'; 
-                    setTimeout(() => { document.getElementById('intro-splash-screen').style.display = 'none'; }, 1200);
+                    setTimeout(() => { 
+                        document.getElementById('intro-splash-screen').style.display = 'none'; 
+                        
+                        // Açılış ekranı tamamen kapandıktan sonra TYCOON çizim animasyonunu başlat
+                        const tycoonText = document.getElementById('tycoon-svg-text');
+                        if (tycoonText) tycoonText.classList.add('play-animation');
+
+                    }, 1200);
                 }, 2500);
 
                 if (user) {
@@ -1136,16 +2079,154 @@
             document.getElementById('main-menu-overlay').style.display = 'flex';
         }
 
-        function openSettingsModal() {
+        function openAchievements() {
             playSound('click');
-            const vText = vibrationEnabled ? "AÇIK" : "KAPALI";
-            const sText = soundEnabled ? "AÇIK" : "KAPALI";
-            showModal("AYARLAR", `Titreşim: <b>${vText}</b> | Ses Efektleri: <b>${sText}</b><br><br>Ayarları değiştirmek için onaylayın.`, "confirm", () => {
-                soundEnabled = !soundEnabled;
-                vibrationEnabled = !vibrationEnabled;
-                if (vibrationEnabled && navigator.vibrate) navigator.vibrate(20);
-                showModal("BİLGİ", "Ses ve Titreşim ayarları güncellendi.", "info");
+            document.getElementById('main-menu-overlay').style.display = 'none';
+            document.getElementById('achievements-overlay').style.display = 'flex';
+            renderAchievements();
+        }
+
+        function closeAchievements() {
+            playSound('click');
+            document.getElementById('achievements-overlay').style.display = 'none';
+            document.getElementById('main-menu-overlay').style.display = 'flex';
+        }
+
+        function renderAchievements() {
+            const produced = Math.floor(stats.totalProduced);
+            const storageLimit = getStorageLimit();
+            const capturedMarkets = Object.values(markets).filter(value => value >= 100).length;
+
+            const achievementRows = [
+                { card: 'achievement-production', state: 'achievement-production-state', done: produced >= 25000, text: `${Math.min(produced, 25000).toLocaleString()} / 25.000`, bar: 'achievement-production-bar', progress: Math.min(100, (produced / 25000) * 100) },
+                { card: 'achievement-megafactory', state: 'achievement-megafactory-state', done: produced >= 500000, text: `${Math.min(produced, 500000).toLocaleString()} / 500.000`, bar: 'achievement-megafactory-bar', progress: Math.min(100, (produced / 500000) * 100) },
+                { card: 'achievement-market', state: 'achievement-market-state', done: capturedMarkets >= 7, text: `${capturedMarkets} / 7`, bar: 'achievement-market-bar', progress: (capturedMarkets / 7) * 100 },
+                { card: 'achievement-billionaire', state: 'achievement-billionaire-state', done: money >= 50000000, text: `$${Math.min(Math.floor(money), 50000000).toLocaleString()} / $50M`, bar: 'achievement-billionaire-bar', progress: Math.min(100, (money / 50000000) * 100) },
+                { card: 'achievement-quantum', state: 'achievement-quantum-state', done: rdUnlockedTier >= 5, text: rdUnlockedTier >= 5 ? 'TAMAMLANDI' : 'KİLİTLİ' },
+                { card: 'achievement-ai', state: 'achievement-ai-state', done: aiLevel > 0, text: aiLevel > 0 ? 'TAMAMLANDI' : 'KİLİTLİ' },
+                { card: 'achievement-os', state: 'achievement-os-state', done: osLevel >= 10, text: `v${Math.min(osLevel, 10)} / v10`, bar: 'achievement-os-bar', progress: Math.min(100, (osLevel / 10) * 100) },
+                { card: 'achievement-engineers', state: 'achievement-engineers-state', done: engineerCount >= 50, text: `${Math.min(engineerCount, 50)} / 50`, bar: 'achievement-engineers-bar', progress: Math.min(100, (engineerCount / 50) * 100) },
+                { card: 'achievement-bonds', state: 'achievement-bonds-state', done: bondInvestment >= 250000, text: `$${Math.min(bondInvestment, 250000).toLocaleString()} / $250K`, bar: 'achievement-bonds-bar', progress: Math.min(100, (bondInvestment / 250000) * 100) },
+                { card: 'achievement-warehouse', state: 'achievement-warehouse-state', done: storageLimit >= 25000, text: `${storageLimit.toLocaleString()} / 25.000`, bar: 'achievement-warehouse-bar', progress: Math.min(100, (storageLimit / 25000) * 100) },
+                { card: 'achievement-patent', state: 'achievement-patent-state', done: patentCount > 0, text: patentCount > 0 ? `${patentCount} PATENT` : 'KİLİTLİ' }
+            ];
+
+            achievementRows.forEach(row => {
+                const card = document.getElementById(row.card);
+                const state = document.getElementById(row.state);
+                if (card) card.classList.toggle('completed', row.done);
+                if (state) state.innerText = row.done ? `✓ ${row.text}` : row.text;
+                if (row.bar) document.getElementById(row.bar).style.width = row.progress + '%';
             });
+        }
+
+        function openSettingsPage() {
+            playSound('click');
+            document.getElementById('main-menu-overlay').style.display = 'none';
+            document.getElementById('settings-overlay').style.display = 'flex';
+            updateSettingsUI();
+            document.getElementById('reset-confirm').style.display = 'none';
+            document.getElementById('settings-notice').style.display = 'none';
+        }
+
+        function openSettingsModal() { openSettingsPage(); }
+
+        function closeSettings() {
+            playSound('click');
+            document.getElementById('settings-overlay').style.display = 'none';
+            document.getElementById('main-menu-overlay').style.display = 'flex';
+        }
+
+        function updateSettingsUI() {
+            const vibrationButton = document.getElementById('settings-vibration');
+            const soundButton = document.getElementById('settings-sound');
+            if (vibrationButton) vibrationButton.innerText = vibrationEnabled ? 'AÇIK' : 'KAPALI';
+            if (soundButton) soundButton.innerText = soundEnabled ? 'AÇIK' : 'KAPALI';
+        }
+
+        function saveSettings() {
+            localStorage.setItem('pft_settings', JSON.stringify({ soundEnabled, vibrationEnabled }));
+        }
+
+        function toggleSetting(setting) {
+            if (setting === 'vibration') vibrationEnabled = !vibrationEnabled;
+            if (setting === 'sound') soundEnabled = !soundEnabled;
+            if (vibrationEnabled && navigator.vibrate) navigator.vibrate(12);
+            updateSettingsUI();
+            saveSettings();
+        }
+
+        function requestResetGame() {
+            playSound('click');
+            document.getElementById('reset-confirm').style.display = 'block';
+            document.getElementById('settings-notice').style.display = 'none';
+        }
+
+        function cancelResetGame() {
+            playSound('click');
+            document.getElementById('reset-confirm').style.display = 'none';
+        }
+
+        function confirmResetGame() {
+            const preservedPeakWealth = stats.peakWealth;
+            const preservedPremiumUntil = premiumUntil;
+            const preservedAdsRemoved = adsRemoved;
+
+            money = 50000;
+            stock = 0;
+            maxStock = 500;
+            baseCostPerUnit = 145;
+            baseSellPrice = 260;
+            autoProduceRate = 0;
+            autoUpgradeCost = BALANCE_CONFIG.firstAutomationCost;
+            warehouseUpgradeCost = 8000;
+            stationLevel = 1;
+            stationUpgradeCost = 40000;
+            robotLevel = 0;
+            robotUpgradeCost = 100000;
+            packagingLevel = 0;
+            packagingUpgradeCost = 150000;
+            engineerCount = 0;
+            engineerCost = 35000;
+            hasMarketer = false;
+            bondInvestment = 0;
+            hasSpyLicense = false;
+            rdUnlockedTier = 1;
+            launchCount = 0;
+            currentDesignSignature = "";
+            cashHistory = [50000];
+            patentCount = 0;
+            patentBonusMultiplier = 1;
+            osLevel = 0;
+            osUpgradeCost = 100000;
+            aiLevel = 0;
+            aiUpgradeCost = 250000;
+            chipCrisisMultiplier = 1;
+            debt = 0;
+            speedMultiplier = 1;
+            speedBoostExpiresAt = 0;
+            markets = { NA: 0, EU: 0, ASIA: 0, SA: 0, AF: 0, OC: 0, AN: 0 };
+            stats = { totalProduced: 0, peakWealth: preservedPeakWealth, peakMarket: 0, loansTaken: 0 };
+            premiumUntil = preservedPremiumUntil;
+            adsRemoved = preservedAdsRemoved;
+            productionBuffer = 0;
+            isHypeActive = false;
+            hypeMultiplier = 1;
+            hypeTimeRemaining = 0;
+            document.getElementById('hype-banner').style.display = 'none';
+            document.getElementById('factory-model-name').innerText = 'Giriş Seviyesi (v1)';
+            [cpuSelect, screenSelect, cameraSelect, bodySelect, batterySelect].forEach(select => { if (select) select.selectedIndex = 0; });
+            calculatePreview();
+            refreshPremiumStatus();
+            updateRDTierUI();
+            updateUI();
+            saveGame();
+            renderAchievements();
+            document.getElementById('reset-confirm').style.display = 'none';
+            const notice = document.getElementById('settings-notice');
+            notice.innerText = 'Oyun sıfırlandı. Premium, reklamsız satın alım ve zirve varlık korundu.';
+            notice.style.display = 'block';
+            playSound('upgrade');
         }
 
         function switchTab(tabId, element) {
@@ -1158,30 +2239,32 @@
 
         // --- HESAPLAMALAR VE ÇARPANLAR ---
         function getEffectiveUnitCost() {
-            let engineerDiscount = Math.min(0.30, engineerCount * 0.02);
-            return Math.max(20, Math.floor(baseCostPerUnit * chipCrisisMultiplier * (1 - engineerDiscount)));
+            let engineerDiscount = Math.min(0.15, engineerCount * 0.01);
+            let premiumDiscount = isPremium ? PREMIUM_CONFIG.costMultiplier : 1;
+            return Math.max(20, Math.floor(baseCostPerUnit * chipCrisisMultiplier * (1 - engineerDiscount) * premiumDiscount));
         }
 
         function getActualSellPrice() {
             let totalMarketBonus = (markets.NA * 1.5) + (markets.EU * 1.3) + (markets.ASIA * 1.2) + 
                                    (markets.SA * 1.1) + (markets.AF * 1.0) + (markets.OC * 1.2) + (markets.AN * 2.0);
             
-            let stationBonus = (stationLevel - 1) * 0.10;
+            let stationBonus = (stationLevel - 1) * 0.08;
             let packagingBonus = packagingLevel * 0.15;
             let ecosystemBonus = (osLevel * 0.15) + (aiLevel * 0.30);
-            return Math.floor(baseSellPrice * (1 + (totalMarketBonus / 100) + stationBonus + packagingBonus + ecosystemBonus) * patentBonusMultiplier * hypeMultiplier);
+            let premiumBonus = isPremium ? PREMIUM_CONFIG.sellMultiplier : 1;
+            return Math.floor(baseSellPrice * (1 + (totalMarketBonus / 100) + stationBonus + packagingBonus + ecosystemBonus) * patentBonusMultiplier * hypeMultiplier * premiumBonus);
         }
 
         function updateUI() {
+            refreshPremiumStatus();
             document.getElementById('display-money').innerText = '$' + Math.floor(money).toLocaleString();
-            document.getElementById('display-stock').innerText = stock + ' / ' + maxStock;
+            document.getElementById('display-stock').innerText = Math.floor(stock) + ' / ' + getStorageLimit();
             
-            let effectiveRate = (autoProduceRate + (engineerCount * 2) + (robotLevel * 5)) * speedMultiplier;
+            let effectiveRate = getEffectiveRate();
             document.getElementById('display-auto-rate').innerText = effectiveRate + ' / sn';
             
-            document.getElementById('display-hourly-capacity').innerText = (effectiveRate * 3600).toLocaleString() + " Adet";
+            document.getElementById('display-hourly-capacity').innerText = Math.floor(effectiveRate * 3600).toLocaleString() + " Adet";
             
-            // Bant Akış Durumu Metni
             const statusEl = document.getElementById('display-conveyor-status');
             if (effectiveRate > 0) {
                 statusEl.innerText = "Aktif (" + effectiveRate + "/sn Akış)";
@@ -1193,8 +2276,9 @@
 
             let currentCost = getEffectiveUnitCost();
             let costPerSec = effectiveRate * currentCost;
-            let passiveSubIncome = (osLevel * 150) + (aiLevel * 450) + (bondInvestment * 0.005);
-            let netCashFlow = passiveSubIncome - costPerSec;
+            let passiveSubIncome = (osLevel * 60) + (aiLevel * 180) + (bondInvestment * 0.0015);
+            let upkeepCost = (engineerCount * 85) + (robotLevel * 140) + (stationLevel * 30);
+            let netCashFlow = passiveSubIncome - costPerSec - upkeepCost;
             
             let rateEl = document.getElementById('display-net-rate');
             if (netCashFlow >= 0) {
@@ -1207,27 +2291,27 @@
 
             document.getElementById('btn-upgrade-auto').innerText = `BANT EKLE (-$${autoUpgradeCost.toLocaleString()})`;
             document.getElementById('display-factory-level').innerText = `Seviye ${stationLevel}`;
-            document.getElementById('display-station-eff').innerText = `+%${(stationLevel - 1) * 10} Değer`;
+            document.getElementById('display-station-eff').innerText = `+%${(stationLevel - 1) * 8} Değer`;
             document.getElementById('btn-upgrade-station').innerText = `İSTASYONU GELİŞTİR (-$${stationUpgradeCost.toLocaleString()})`;
             
-            document.getElementById('display-robot-level').innerText = robotLevel > 0 ? `Seviye ${robotLevel} (+${robotLevel * 5}/sn)` : "Yok";
+            document.getElementById('display-robot-level').innerText = robotLevel > 0 ? `Seviye ${robotLevel} (+${robotLevel * 3}/sn)` : "Yok";
             document.getElementById('btn-upgrade-robot').innerText = `ROBOT KOL GELİŞTİR (-$${robotUpgradeCost.toLocaleString()})`;
 
             document.getElementById('display-packaging-level').innerText = packagingLevel > 0 ? `Özel VIP (Kâr +%${packagingLevel * 15})` : "Standart Kutu";
             document.getElementById('btn-upgrade-packaging').innerText = `KUTU HATTINI GELİŞTİR (-$${packagingUpgradeCost.toLocaleString()})`;
 
-            document.getElementById('display-engineers').innerText = `${engineerCount} Ekip (-%${Math.min(30, engineerCount * 2)} Maliyet)`;
+            document.getElementById('display-engineers').innerText = `${engineerCount} Ekip (-%${Math.min(15, engineerCount)} Maliyet)`;
             document.getElementById('btn-hire-engineer').innerText = `MÜHENDİS AL (-$${engineerCost.toLocaleString()})`;
             document.getElementById('display-marketers').innerText = hasMarketer ? "Aktif (Korumalı)" : "Yok";
             document.getElementById('btn-hire-marketer').style.display = hasMarketer ? "none" : "block";
-            document.getElementById('display-bonds').innerText = `$${bondInvestment.toLocaleString()} Tahvil (+$${Math.floor(bondInvestment * 0.005)}/sn)`;
+            document.getElementById('display-bonds').innerText = `$${bondInvestment.toLocaleString()} Tahvil (+$${Math.floor(bondInvestment * 0.0015)}/sn)`;
 
             document.getElementById('os-status').innerText = osLevel > 0 ? `CTS OS v${osLevel}.0 (+%${osLevel * 15})` : "Açık Kaynak (v0)";
             document.getElementById('btn-upgrade-os').innerText = `ÖZEL OS GELİŞTİR (-$${osUpgradeCost.toLocaleString()})`;
             document.getElementById('ai-status').innerText = aiLevel > 0 ? `Cyber AI v${aiLevel}.0 (+%${aiLevel * 30})` : "Yok";
             document.getElementById('btn-upgrade-ai').innerText = `YAPAY ZEKA ENTEGRE ET (-$${aiUpgradeCost.toLocaleString()})`;
 
-            document.getElementById('manage-stock-limit').innerText = maxStock.toLocaleString();
+            document.getElementById('manage-stock-limit').innerText = getStorageLimit().toLocaleString();
             document.getElementById('btn-upgrade-warehouse').innerText = `DEPO GENİŞLET (-$${warehouseUpgradeCost.toLocaleString()})`;
 
             document.getElementById('factory-cost-display').innerText = `-$${currentCost}`;
@@ -1249,13 +2333,15 @@
                 if (elBar) elBar.style.width = markets[code] + '%';
                 if (elTxt) elTxt.innerText = '%' + markets[code];
             });
+
+            updateRDTierUI();
         }
 
         // Toplu Üretim (10x / 50x)
         function batchProduce(count) {
             let currentCost = getEffectiveUnitCost();
             let maxAffordable = Math.floor(money / currentCost);
-            let availableSpace = maxStock - stock;
+            let availableSpace = getStorageLimit() - stock;
             let produceAmount = Math.min(count, maxAffordable, availableSpace);
 
             if (produceAmount > 0) {
@@ -1263,7 +2349,6 @@
                 stock += produceAmount;
                 stats.totalProduced += produceAmount;
                 
-                // Üretim adedine göre fiziksel cihazları konveyöre yerleştir
                 let visuals = Math.min(produceAmount, 5);
                 for (let i = 0; i < visuals; i++) {
                     setTimeout(spawnPhoneOnConveyor, i * 150);
@@ -1281,34 +2366,64 @@
 
         // --- GAME LOOP ---
         setInterval(() => {
-            let effectiveRate = (autoProduceRate + (engineerCount * 2) + (robotLevel * 5)) * speedMultiplier;
+            const tickSeconds = BALANCE_CONFIG.productionTickMs / 1000;
+            let effectiveRate = getEffectiveRate();
             let currentCost = getEffectiveUnitCost();
 
-            let passiveIncome = (osLevel * 150) + (aiLevel * 450) + (bondInvestment * 0.005);
+            let passiveIncome = ((osLevel * 60) + (aiLevel * 180) + (bondInvestment * 0.0015)) * tickSeconds;
             if (passiveIncome > 0) money += passiveIncome;
 
-            if (effectiveRate > 0 && stock < maxStock && money >= currentCost) {
+            let upkeepCost = (engineerCount * 85) + (robotLevel * 140) + (stationLevel * 30);
+            money -= upkeepCost;
+
+            if (stock >= (getStorageLimit() * 0.9)) {
+                let overflowFee = Math.floor(stock * 1.8);
+                money -= overflowFee;
+            }
+
+            if (debt > 0) {
+                let debtPenalty = money < 0 ? 0.002 : 0.00083;
+                debt += (debt * debtPenalty * tickSeconds);
+            }
+
+            if (debt >= 500000) {
+                checkBankruptcy("Bankaya olan borcunuz <b>$500.000</b> tavanını aştı ve kredileriniz geri çağrıldı. İflas ilan edildi!");
+                return;
+            }
+            if (money <= -100000) {
+                checkBankruptcy("Şirket kasanız <b>-$100.000</b> sınırının altına indi. Tedarikçilere ödeme yapamadığınız için mahkeme şirketinizi tasfiye etti!");
+                return;
+            }
+
+            // Güvenlik Marjı: Canlı oyunda da kasa $5.000 altına inerse iflası önlemek için üretimi durdur
+            if (effectiveRate > 0 && stock < getStorageLimit() && money >= currentCost && money >= 5000) {
+                productionBuffer = Math.min(productionBuffer + (effectiveRate * tickSeconds), 4);
                 let maxAffordable = Math.floor(money / currentCost);
-                let availableSpace = maxStock - stock;
-                let productionAmount = Math.min(effectiveRate, maxAffordable, availableSpace);
+                let availableSpace = Math.floor(getStorageLimit() - stock);
+                let productionAmount = Math.min(Math.floor(productionBuffer), maxAffordable, availableSpace);
 
                 if (productionAmount > 0) {
+                    productionBuffer -= productionAmount;
                     money -= (productionAmount * currentCost); 
                     stock += productionAmount; 
                     stats.totalProduced += productionAmount;
                     
-                    // Saniyede 1 görsel cihazı banda yerleştir
-                    spawnPhoneOnConveyor();
+                    for (let i = 0; i < Math.min(productionAmount, 4); i++) setTimeout(spawnPhoneOnConveyor, i * 180);
                     triggerAssemblyProgress();
                     playSound('produce');
                 }
+            } else {
+                productionBuffer = 0;
             }
-            if (debt > 0) { debt += (debt * 0.00083); }
+
             if (money > stats.peakWealth) { stats.peakWealth = money; }
             
+            cashHistory.push(Math.floor(money));
+            if (cashHistory.length > 20) cashHistory.shift();
+
             if (isHypeActive) {
-                hypeTimeRemaining--;
-                document.getElementById('hype-timer').innerText = hypeTimeRemaining;
+                hypeTimeRemaining = Math.max(0, hypeTimeRemaining - (BALANCE_CONFIG.productionTickMs / 1000));
+                document.getElementById('hype-timer').innerText = Math.ceil(hypeTimeRemaining);
                 if (hypeTimeRemaining <= 0) {
                     isHypeActive = false;
                     hypeMultiplier = 1;
@@ -1322,7 +2437,13 @@
             }
 
             updateUI();
-        }, 1000);
+
+            if (activeModalType === 'cash') {
+                document.getElementById('modal-desc').innerHTML = renderCashModalContent();
+            } else if (activeModalType === 'storage') {
+                document.getElementById('modal-desc').innerHTML = renderStorageModalContent();
+            }
+        }, BALANCE_CONFIG.productionTickMs);
 
         // --- PİYASA DALGALANMASI VE RAKİP ATAKLARI (25 SN) ---
         const marketEvents = [
@@ -1356,8 +2477,10 @@
 
         // --- FABRİKA ETKİLEŞİMLERİ ---
         document.getElementById('btn-manual-produce').addEventListener('pointerdown', (e) => {
+            if (Date.now() - lastManualProduceAt < BALANCE_CONFIG.manualCooldownMs) return;
             let currentCost = getEffectiveUnitCost();
-            if (money >= currentCost && stock < maxStock) { 
+            if (money >= currentCost && stock < getStorageLimit()) { 
+                lastManualProduceAt = Date.now();
                 money -= currentCost; 
                 stock++; 
                 stats.totalProduced++; 
@@ -1375,6 +2498,8 @@
                 let gained = stock * getActualSellPrice();
                 money += gained; 
                 stock = 0; 
+                cashHistory.push(Math.floor(money));
+                if (cashHistory.length > 20) cashHistory.shift();
                 playSound('sell');
                 updateUI();
                 saveGame();
@@ -1386,7 +2511,7 @@
             if (money >= autoUpgradeCost) {
                 money -= autoUpgradeCost; 
                 autoProduceRate += 1; 
-                autoUpgradeCost = Math.floor(autoUpgradeCost * 1.5);
+                autoUpgradeCost = Math.floor(autoUpgradeCost * BALANCE_CONFIG.automationCostGrowth);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1397,7 +2522,7 @@
             if (money >= stationUpgradeCost) {
                 money -= stationUpgradeCost;
                 stationLevel++;
-                stationUpgradeCost = Math.floor(stationUpgradeCost * 2.2);
+                stationUpgradeCost = Math.floor(stationUpgradeCost * 2.4);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1408,7 +2533,7 @@
             if (money >= robotUpgradeCost) {
                 money -= robotUpgradeCost;
                 robotLevel++;
-                robotUpgradeCost = Math.floor(robotUpgradeCost * 2.5);
+                robotUpgradeCost = Math.floor(robotUpgradeCost * 2.6);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1419,7 +2544,7 @@
             if (money >= packagingUpgradeCost) {
                 money -= packagingUpgradeCost;
                 packagingLevel++;
-                packagingUpgradeCost = Math.floor(packagingUpgradeCost * 2.8);
+                packagingUpgradeCost = Math.floor(packagingUpgradeCost * 3.0);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1431,7 +2556,7 @@
             if (money >= engineerCost) {
                 money -= engineerCost;
                 engineerCount++;
-                engineerCost = Math.floor(engineerCost * 1.7);
+                engineerCost = Math.floor(engineerCost * 1.9);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1454,7 +2579,7 @@
                 money -= 10000;
                 bondInvestment += 10000;
                 playSound('sell');
-                showModal("TAHVİL ALINDI", "Holding portföyüne $10,000 tahvil eklendi. Saniyede +$50 pasif faiz geliri bağlanacak.", "info");
+                showModal("TAHVİL ALINDI", "Holding portföyüne $10,000 tahvil eklendi. Saniyede +$15 pasif faiz geliri bağlanacak.", "info");
                 updateUI();
                 saveGame();
             } else {
@@ -1465,8 +2590,8 @@
         document.getElementById('btn-upgrade-warehouse').addEventListener('pointerdown', (e) => {
             if (money >= warehouseUpgradeCost) {
                 money -= warehouseUpgradeCost; 
-                maxStock += 500; 
-                warehouseUpgradeCost = Math.floor(warehouseUpgradeCost * 1.8);
+                maxStock += BALANCE_CONFIG.warehouseCapacityStep; 
+                warehouseUpgradeCost = Math.floor(warehouseUpgradeCost * BALANCE_CONFIG.warehouseCostGrowth);
                 playSound('upgrade');
                 updateUI();
                 saveGame();
@@ -1477,7 +2602,7 @@
             if (money >= osUpgradeCost) {
                 money -= osUpgradeCost;
                 osLevel++;
-                osUpgradeCost = Math.floor(osUpgradeCost * 2.5);
+                osUpgradeCost = Math.floor(osUpgradeCost * 2.8);
                 playSound('upgrade');
                 showModal("OS GELİŞTİRİLDİ", `Özel CTS OS v${osLevel}.0 yayınlandı! Satış fiyatları %15 arttı ve abonelik geliri bağlandı!`, "info");
                 updateUI();
@@ -1491,7 +2616,7 @@
             if (money >= aiUpgradeCost) {
                 money -= aiUpgradeCost;
                 aiLevel++;
-                aiUpgradeCost = Math.floor(aiUpgradeCost * 2.8);
+                aiUpgradeCost = Math.floor(aiUpgradeCost * 3.2);
                 playSound('upgrade');
                 showModal("YAPAY ZEKA ENTEGRE EDİLDİ", `Cyber AI v${aiLevel}.0 asistanı telefonlara eklendi! Satış fiyatına +%30 prim geldi!`, "info");
                 updateUI();
@@ -1553,6 +2678,7 @@
 
         // --- MAĞAZA (SHOP) FONKSİYONLARI ---
         function watchRewardAd() {
+            if (adsRemoved) return;
             playSound('click');
             showModal("Sponsorlu Reklam", "Reklam yükleniyor... Lütfen bekleyin.", "info");
             setTimeout(() => {
@@ -1566,9 +2692,17 @@
 
         function buyIAP(type) {
             playSound('click');
-            if (type === 'speed') {
-                speedMultiplier = 2;
-                showModal("SATIN ALIM ONAYI", "2X Fabrika Hızlandırıcısı aktif edildi!", "info");
+            if (type === 'premium') {
+                premiumUntil = Math.max(Date.now(), premiumUntil) + PREMIUM_CONFIG.durationMs;
+                refreshPremiumStatus();
+                showModal("GOLD TYCOON AKTİF", "30 günlük Premium üyeliğin başladı.<br><br>✦ Oto-Lojistik Satış Protokolü Devrede (Çevrimdışı Otomatik Satış)<br>✦ Altın tema, daha hızlı üretim ve yüksek satış avantajları açıldı.", "info");
+            } else if (type === 'speed') {
+                speedMultiplier = 1.25;
+                speedBoostExpiresAt = Date.now() + (10 * 60 * 1000);
+                showModal("HIZLANDIRICI AKTİF", "Montaj hattı 10 dakika boyunca %25 daha hızlı çalışacak.", "info");
+            } else if (type === 'removeAds') {
+                adsRemoved = true;
+                showModal("REKLAMLAR KALDIRILDI", "Sponsor hibe ekranı hesabından kaldırıldı. Bu satın alım oyun sıfırlansa bile korunur.", "info");
             } else if (type === 'spy') {
                 hasSpyLicense = true;
                 showModal("LİSANS AKTİF", "Endüstriyel Casusluk Lisansı devrede! Rakiplerin pazar payı indirme hamleleri engellendi.", "info");
@@ -1583,12 +2717,168 @@
             saveGame();
         }
 
-        // --- AR-GE VE LANSMAN MOTORU ---
+        // --- 5 KADEMELİ AR-GE VE LANSMAN MOTORU ---
         const cpuSelect = document.getElementById('select-cpu');
         const screenSelect = document.getElementById('select-screen');
         const cameraSelect = document.getElementById('select-camera');
         const bodySelect = document.getElementById('select-body');
         const batterySelect = document.getElementById('select-battery');
+
+        function updateRDTierUI() {
+            const tierBadge = document.getElementById('display-rd-tier');
+            const nextName = document.getElementById('rd-next-tier-name');
+            const reqText = document.getElementById('rd-requirements-text');
+            const unlockBtn = document.getElementById('btn-unlock-tier');
+            if (!tierBadge || !reqText || !unlockBtn) return;
+
+            const totalProd = Math.floor(stats.totalProduced || 0);
+
+            if (rdUnlockedTier === 1) {
+                tierBadge.innerText = "Kademe 1 (Giriş)";
+                tierBadge.style.color = "var(--accent-blue)";
+                nextName.innerText = "Kademe 2 (Orta Segment)";
+                reqText.innerHTML = `Şartlar: En az <b>10.000 Üretim</b> (${totalProd.toLocaleString()} / 10.000) & <b>$300.000</b> Fon`;
+                unlockBtn.innerText = "KADEME 2 LİSANSINI AL (-$300.000)";
+                unlockBtn.style.display = "block";
+                
+                const canUnlock = (totalProd >= 10000 && money >= 300000);
+                unlockBtn.style.opacity = canUnlock ? "1" : "0.5";
+                unlockBtn.style.borderColor = canUnlock ? "var(--accent-green)" : "rgba(255,255,255,0.1)";
+
+            } else if (rdUnlockedTier === 2) {
+                tierBadge.innerText = "Kademe 2 (Orta Segment)";
+                tierBadge.style.color = "var(--accent-green)";
+                nextName.innerText = "Kademe 3 (İleri Teknoloji)";
+                reqText.innerHTML = `Şartlar: En az <b>50.000 Üretim</b> (${totalProd.toLocaleString()} / 50.000), <b>3 Mühendis</b> (${engineerCount}/3) & <b>$1.200.000</b> Fon`;
+                unlockBtn.innerText = "KADEME 3 LİSANSINI AL (-$1.200.000)";
+                unlockBtn.style.display = "block";
+
+                const canUnlock = (totalProd >= 50000 && engineerCount >= 3 && money >= 1200000);
+                unlockBtn.style.opacity = canUnlock ? "1" : "0.5";
+                unlockBtn.style.borderColor = canUnlock ? "var(--accent-green)" : "rgba(255,255,255,0.1)";
+
+            } else if (rdUnlockedTier === 3) {
+                tierBadge.innerText = "Kademe 3 (İleri Teknoloji)";
+                tierBadge.style.color = "var(--accent-purple)";
+                nextName.innerText = "Kademe 4 (Uzman / Amiral)";
+                reqText.innerHTML = `Şartlar: En az <b>200.000 Üretim</b> (${totalProd.toLocaleString()} / 200.000), <b>6 Mühendis</b> (${engineerCount}/6), <b>CTS OS v1</b> & <b>$5.000.000</b> Fon`;
+                unlockBtn.innerText = "KADEME 4 LİSANSINI AL (-$5.000.000)";
+                unlockBtn.style.display = "block";
+
+                const canUnlock = (totalProd >= 200000 && engineerCount >= 6 && osLevel >= 1 && money >= 5000000);
+                unlockBtn.style.opacity = canUnlock ? "1" : "0.5";
+                unlockBtn.style.borderColor = canUnlock ? "var(--accent-green)" : "rgba(255,255,255,0.1)";
+
+            } else if (rdUnlockedTier === 4) {
+                tierBadge.innerText = "Kademe 4 (Uzman / Amiral)";
+                tierBadge.style.color = "var(--accent-amber)";
+                nextName.innerText = "Kademe 5 (Kuantum Zirve)";
+                reqText.innerHTML = `Şartlar: En az <b>750.000 Üretim</b> (${totalProd.toLocaleString()} / 750.000), <b>12 Mühendis</b> (${engineerCount}/12), <b>Cyber AI v1</b> & <b>$20.000.000</b> Fon`;
+                unlockBtn.innerText = "KADEME 5 LİSANSINI AL (-$20.000.000)";
+                unlockBtn.style.display = "block";
+
+                const canUnlock = (totalProd >= 750000 && engineerCount >= 12 && aiLevel >= 1 && money >= 20000000);
+                unlockBtn.style.opacity = canUnlock ? "1" : "0.5";
+                unlockBtn.style.borderColor = canUnlock ? "var(--accent-green)" : "rgba(255,255,255,0.1)";
+
+            } else {
+                tierBadge.innerText = "Kademe 5 (Kuantum Zirve - Maksimum)";
+                tierBadge.style.color = "#f43f5e";
+                nextName.innerText = "Maksimum Zirveye Ulaşıldı";
+                reqText.innerText = "Dünya teknoloji pazarının mutlak liderisiniz.";
+                unlockBtn.style.display = "none";
+            }
+
+            const updateSelectOptions = (sel) => {
+                if (!sel) return;
+                Array.from(sel.options).forEach(opt => {
+                    let parts = opt.value.split(',');
+                    let tier = Number(parts[2] || 1);
+                    let cleanText = opt.text.replace(/🔒\s*/g, '').replace(/\s*\[K[1-5]\]/g, '');
+                    if (tier > rdUnlockedTier) {
+                        opt.text = `🔒 ${cleanText} [K${tier}]`;
+                    } else {
+                        opt.text = cleanText;
+                    }
+                });
+            };
+            [cpuSelect, screenSelect, cameraSelect, bodySelect, batterySelect].forEach(updateSelectOptions);
+        }
+
+        function unlockNextRDTier() {
+            if (rdUnlockedTier === 1) {
+                if (stats.totalProduced < 10000) {
+                    showModal("AR-GE YETERSİZ", "Kademe 2 için en az <b>10.000 telefon</b> üretmelisiniz.", "info");
+                    return;
+                }
+                if (money < 300000) {
+                    showModal("YETERSİZ SERMAYE", "Kademe 2 lisans bedeli olan <b>$300.000</b> kasanızda yok.", "info");
+                    return;
+                }
+                money -= 300000;
+                rdUnlockedTier = 2;
+                playSound('upgrade');
+                showModal("LİSANS ALINDI!", "Kademe 2 Orta Segment lisansı açıldı!", "info");
+            } else if (rdUnlockedTier === 2) {
+                if (stats.totalProduced < 50000 || engineerCount < 3) {
+                    showModal("AR-GE YETERSİZ", "Kademe 3 için en az <b>50.000 üretim</b> ve <b>3 Mühendis</b> gerekir.", "info");
+                    return;
+                }
+                if (money < 1200000) {
+                    showModal("YETERSİZ SERMAYE", "Kademe 3 lisans bedeli olan <b>$1.200.000</b> kasanızda yok.", "info");
+                    return;
+                }
+                money -= 1200000;
+                rdUnlockedTier = 3;
+                playSound('upgrade');
+                showModal("LİSANS ALINDI!", "Kademe 3 İleri Teknoloji lisansı açıldı!", "info");
+            } else if (rdUnlockedTier === 3) {
+                if (stats.totalProduced < 200000 || engineerCount < 6 || osLevel < 1) {
+                    showModal("AR-GE YETERSİZ", "Kademe 4 için en az <b>200.000 üretim</b>, <b>6 Mühendis</b> ve <b>Özel CTS OS v1</b> gerekir.", "info");
+                    return;
+                }
+                if (money < 5000000) {
+                    showModal("YETERSİZ SERMAYE", "Kademe 4 lisans bedeli olan <b>$5.000.000</b> kasanızda yok.", "info");
+                    return;
+                }
+                money -= 5000000;
+                rdUnlockedTier = 4;
+                playSound('upgrade');
+                showModal("LİSANS ALINDI!", "Kademe 4 Uzman Amiral lisansı açıldı!", "info");
+            } else if (rdUnlockedTier === 4) {
+                if (stats.totalProduced < 750000 || engineerCount < 12 || aiLevel < 1) {
+                    showModal("AR-GE YETERSİZ", "Zirve Kademe 5 için en az <b>750.000 üretim</b>, <b>12 Mühendis</b> ve <b>Yapay Zeka (AI) Asistanı</b> gerekir.", "info");
+                    return;
+                }
+                if (money < 20000000) {
+                    showModal("YETERSİZ SERMAYE", "Kademe 5 lisans bedeli olan <b>$20.000.000</b> kasanızda yok.", "info");
+                    return;
+                }
+                money -= 20000000;
+                rdUnlockedTier = 5;
+                playSound('upgrade');
+                showModal("KUTSAL ZİRVE!", "Kademe 5 Kuantum Zirve lisansı açıldı! Artık dünyanın en üstün teknolojisini üretip satabilirsiniz.", "info");
+            }
+            updateRDTierUI();
+            calculatePreview();
+            updateUI();
+            saveGame();
+        }
+
+        function getSelectedSignature() {
+            return [
+                cpuSelect.value,
+                screenSelect.value,
+                cameraSelect.value,
+                bodySelect.value,
+                batterySelect.value
+            ].join('|');
+        }
+
+        function getLaunchCost(tier) {
+            let tierMultiplier = 1 + ((tier - 1) * 0.5);
+            return Math.floor(baseLaunchCost * Math.pow(2.5, launchCount) * tierMultiplier);
+        }
 
         function calculatePreview() {
             let cpu = cpuSelect.value.split(',').map(Number);
@@ -1596,56 +2886,116 @@
             let cam = cameraSelect.value.split(',').map(Number);
             let body = bodySelect.value.split(',').map(Number);
             let bat = batterySelect.value.split(',').map(Number);
+
+            let maxTierSelected = Math.max(cpu[2] || 1, screen[2] || 1, cam[2] || 1, body[2] || 1, bat[2] || 1);
+            const badge = document.getElementById('patent-badge');
+            const applyBtn = document.getElementById('btn-apply-design');
+            const selectedSig = getSelectedSignature();
+            const isAlreadyActive = (currentDesignSignature !== "" && selectedSig === currentDesignSignature);
+            const requiredLaunchCost = getLaunchCost(maxTierSelected);
+
+            if (maxTierSelected > rdUnlockedTier) {
+                badge.innerText = `⚠️ Kilitli Parça Seçildi! (Gereken Lisans: Kademe ${maxTierSelected})`;
+                badge.style.color = "#ef4444";
+                applyBtn.innerText = "KİLİTLİ PARÇA İÇERİYOR";
+                applyBtn.style.opacity = "0.5";
+                applyBtn.style.background = "#334155";
+            } else if (isAlreadyActive) {
+                badge.innerText = "ℹ️ Bu konfigürasyon halihazırda montaj hattında.";
+                badge.style.color = "var(--text-muted)";
+                applyBtn.innerText = "BU MODEL ZATEN ÜRETİMDE";
+                applyBtn.style.opacity = "0.5";
+                applyBtn.style.background = "#1e293b";
+            } else {
+                let isPatentEligible = (maxTierSelected === 5);
+                if (isPatentEligible) {
+                    badge.innerText = "⭐ Kuantum Amiral Patenti Uygun! (Fiyata +%35 Kalıcı Prim)";
+                    badge.style.color = "var(--accent-green)";
+                } else {
+                    badge.innerText = "Patent Uygunluğu: Standart / Dengeli Cihaz";
+                    badge.style.color = "var(--accent-amber)";
+                }
+
+                applyBtn.innerText = `LANSMAN YAP (-$${requiredLaunchCost.toLocaleString()})`;
+                if (money >= requiredLaunchCost) {
+                    applyBtn.style.opacity = "1";
+                    applyBtn.style.background = "linear-gradient(135deg, #8b5cf6, #6d28d9)";
+                } else {
+                    applyBtn.style.opacity = "0.6";
+                    applyBtn.style.background = "rgba(239, 68, 68, 0.4)";
+                }
+            }
             
             let totalCost = cpu[0] + screen[0] + cam[0] + body[0] + bat[0] + 75; 
-            let totalPrice = cpu[1] + screen[1] + cam[1] + body[1] + bat[1] + 165; 
-            
-            const badge = document.getElementById('patent-badge');
-            let isPatentEligible = (cpu[0] === 150 && screen[0] === 100 && cam[0] === 110);
-            if (isPatentEligible) {
-                badge.innerText = "⭐ Amiral Gemisi Patenti Uygun! (Fiyata +%35 Kalıcı Prim)";
-                badge.style.color = "var(--accent-green)";
-            } else {
-                badge.innerText = "Patent Uygunluğu: Standart Cihaz";
-                badge.style.color = "var(--accent-amber)";
-            }
+            let totalPrice = cpu[1] + screen[1] + cam[1] + body[1] + bat[1] + 115; 
 
             document.getElementById('preview-cost').innerText = `-$${totalCost}`;
             document.getElementById('preview-price').innerText = `+$${totalPrice}`;
             
-            return { cost: totalCost, price: totalPrice, isPatent: isPatentEligible };
+            return { 
+                cost: totalCost, 
+                price: totalPrice, 
+                maxTier: maxTierSelected, 
+                isPatent: (maxTierSelected === 5),
+                isAlreadyActive: isAlreadyActive,
+                launchCost: requiredLaunchCost
+            };
         }
 
         [cpuSelect, screenSelect, cameraSelect, bodySelect, batterySelect].forEach(el => {
-            el.addEventListener('change', () => { playSound('click'); calculatePreview(); });
+            if (el) el.addEventListener('change', () => { 
+                playSound('click'); 
+                calculatePreview(); 
+            });
         });
 
         document.getElementById('btn-apply-design').addEventListener('pointerdown', (e) => {
             const newDesign = calculatePreview();
+
+            if (newDesign.isAlreadyActive) {
+                showModal("ZATEN ÜRETİMDE", "Bu model zaten fabrikada aktif olarak üretiliyor. Farklı bir donanım seçmelisiniz.", "info");
+                return;
+            }
+
+            if (newDesign.maxTier > rdUnlockedTier) {
+                showModal("LİSANS GEREKİYOR", `Seçtiğiniz donanım mimarisi henüz açmadığınız <b>Kademe ${newDesign.maxTier}</b> parçalar içeriyor. Önce ilgili Ar-Ge lisansını almalısınız.`, "info");
+                return;
+            }
+
+            if (money < newDesign.launchCost) {
+                showModal("YETERSİZ SERMAYE", `Bu modelin lansman masrafı için <b>$${newDesign.launchCost.toLocaleString()}</b> gerekmektedir.`, "info");
+                return;
+            }
+
+            money -= newDesign.launchCost;
+            launchCount++;
+            currentDesignSignature = getSelectedSignature();
+
             baseCostPerUnit = newDesign.cost; 
             baseSellPrice = newDesign.price;
             
-            let reviewScore = Math.min(9.9, ((baseCostPerUnit / 350) * 4 + 5.8)).toFixed(1);
+            let reviewScore = Math.min(9.9, ((baseCostPerUnit / 650) * 4 + 5.8)).toFixed(1);
             
             if (newDesign.isPatent) {
                 patentCount++;
                 patentBonusMultiplier = 1.35;
-                document.getElementById('factory-model-name').innerText = "Patentli Pro Amiral Model";
+                document.getElementById('factory-model-name').innerText = "Patentli Kuantum Amiral";
             } else {
                 patentBonusMultiplier = 1.0;
-                document.getElementById('factory-model-name').innerText = "Özel Amiral Model";
+                document.getElementById('factory-model-name').innerText = newDesign.maxTier >= 3 ? `Kademe ${newDesign.maxTier} Pro Model` : (newDesign.maxTier === 2 ? "Gelişmiş Plus Model" : "Giriş Seviyesi (v1)");
             }
 
             isHypeActive = true;
-            hypeMultiplier = 3;
-            hypeTimeRemaining = 60;
+            hypeMultiplier = BALANCE_CONFIG.hypeMultiplier;
+            hypeTimeRemaining = BALANCE_CONFIG.hypeDurationSeconds;
             
             document.getElementById('display-review-score').innerText = reviewScore + "/10";
             document.getElementById('hype-banner').style.display = 'block';
 
             playSound('hype');
-            showModal("KÜRESEL LANSMAN BAŞARILI!", `Teknoloji basını yeni modelinize <b>${reviewScore}/10</b> verdi!<br><br>🔥 Ön sipariş çılgınlığı başladı: Sonraki <b>60 saniye boyunca</b> satış fiyatınız 3 katına çıktı!`, "info");
+            showModal("KÜRESEL LANSMAN BAŞARILI!", `Teknoloji basını yeni modelinize <b>${reviewScore}/10</b> verdi!<br><br>🔥 Lansman masrafı: <b>-$${newDesign.launchCost.toLocaleString()}</b><br>Ön sipariş dönemi başladı: Sonraki <b>${BALANCE_CONFIG.hypeDurationSeconds} saniye boyunca</b> satış fiyatınız %35 arttı.`, "info");
 
+            calculatePreview();
             updateUI();
             saveGame();
             if (vibrationEnabled && navigator.vibrate) navigator.vibrate([30, 50, 30]);
