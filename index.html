@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Phone Factory Tycoon</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#070b14">
+
+    <!-- FIREBASE SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #070b14;
+            --panel-bg: #111927;
+            --accent-blue: #00f2fe;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        
+        * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
+        body { margin: 0; background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+
+        /* ÖZEL SCROLLBAR */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(7, 11, 20, 0.95); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 242, 254, 0.25); border-radius: 4px; border: 1px solid rgba(0, 242, 254, 0.4); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); box-shadow: 0 0 10px rgba(0, 242, 254, 0.8); }
+        * { scrollbar-width: thin; scrollbar-color: rgba(0, 242, 254, 0.3) rgba(7, 11, 20, 0.95); }
+
+        #app-container {
+            width: 100%; max-width: 414px; height: 100vh; max-height: 896px;
+            background-color: var(--bg-dark); color: var(--text-main);
+            display: flex; flex-direction: column; position: relative;
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.15); overflow: hidden;
+        }
+
+        @keyframes dustFloat {
+            0% { transform: translate(0, 0) scale(0.1); opacity: 0; }
+            20% { opacity: 0.9; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(var(--s)); opacity: 0; }
+        }
+
+        @keyframes pulse-network { 
+            0% { transform: scale(0.9); opacity: 0.5; filter: drop-shadow(0 0 5px rgba(0,242,254,0.3)); } 
+            100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 25px rgba(0,242,254,1)); } 
+        }
+
+        .info-slide {
+            position: absolute; width: 100%; top: 0; left: 0; opacity: 0;
+            animation: carousel-fade 50s infinite; text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        @keyframes carousel-fade { 0% { opacity: 0; } 2% { opacity: 1; } 8% { opacity: 1; } 10% { opacity: 0; } 100% { opacity: 0; } }
+
+        #main-menu-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top, #0d1b2a 0%, #050811 100%);
+            z-index: 1000; display: none; flex-direction: column; justify-content: space-between;
+            align-items: center; padding: 50px 25px 30px; box-sizing: border-box;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .menu-title { text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.4); margin-top: 20px; }
+        .menu-subtitle { display: block; font-size: 20px; color: var(--accent-blue); letter-spacing: 4px; margin-top: 5px; text-shadow: 0 0 15px rgba(0, 242, 254, 0.7); }
+        .menu-buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .menu-btn { border: none; border-radius: 12px; padding: 14px 10px; font-size: 13px; font-weight: 800; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.1s ease; }
+        .menu-btn:active { transform: scale(0.98); }
+        
+        .btn-start { background: linear-gradient(135deg, #00f2fe, #00c6ff); color: #050811; box-shadow: 0 0 20px rgba(0, 242, 254, 0.4); font-size: 14px; }
+        .btn-purple { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid #8b5cf6; }
+        .btn-amber { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid #f59e0b; }
+        .btn-dark { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid #ef4444; }
+
+        #profile-overlay, #leaderboard-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top, #0d1b2a 0%, #050811 100%);
+            z-index: 1100; display: none; flex-direction: column; align-items: center;
+            padding: 40px 20px 20px; box-sizing: border-box; overflow-y: auto;
+        }
+
+        .profile-title { font-size: 24px; font-weight: 900; color: #c4b5fd; letter-spacing: 2px; text-shadow: 0 0 15px rgba(139, 92, 246, 0.5); margin-bottom: 5px; }
+        .profile-username { font-size: 14px; color: #fff; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+        .profile-uid-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.4); padding: 4px 12px; border-radius: 12px; font-size: 10px; color: #c4b5fd; letter-spacing: 1px; margin-bottom: 15px; }
+        .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .stat-title { font-size: 12px; color: var(--text-muted); font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .stat-value { font-size: 16px; font-weight: 900; color: #fff; }
+
+        .leader-item {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; padding: 12px 16px; width: 100%; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 8px; font-size: 13px;
+        }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--panel-bg); border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: max(12px, env(safe-area-inset-top)); }
+        .balance { font-size: 18px; font-weight: 800; color: var(--accent-green); }
+        .rate-indicator { font-size: 10px; font-weight: bold; margin-top: 2px; }
+        .debt-text { font-size: 10px; color: #ef4444; display: none; }
+        .btn-menu-open { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 800; margin-right: 12px; }
+
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .factory-card { background: var(--panel-bg); border-radius: 14px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .btn-action { border: none; color: white; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 8px; width: 100%; cursor: pointer; transition: transform 0.1s; }
+        .btn-action:active { transform: scale(0.97); }
+        
+        .progress-bg { background: rgba(0,0,0,0.4); border-radius: 6px; height: 10px; width: 100%; margin-bottom: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-fill { background: var(--accent-blue); height: 100%; width: 0%; transition: width 0.3s ease; }
+
+        .assembly-bar { height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; margin: 10px 0 15px 0; border: 1px solid rgba(255,255,255,0.05); }
+        .assembly-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #00f2fe, #10b981); transition: width 0.1s linear; }
+
+        /* GERÇEK VE FİZİKSEL MONTAJ HATTI */
+        .conveyor-stage {
+            background: #090e17;
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 10px;
+            height: 48px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        .conveyor-belt-grid {
+            position: absolute; width: 100%; height: 100%;
+            background: repeating-linear-gradient(90deg, transparent, transparent 15px, rgba(255,255,255,0.03) 15px, rgba(255,255,255,0.03) 18px);
+        }
+        .conveyor-endpoint {
+            position: absolute; right: 0; top: 0; width: 36px; height: 100%;
+            background: linear-gradient(90deg, transparent, #10b98133);
+            border-left: 1px dashed rgba(16, 185, 129, 0.4);
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+            z-index: 2;
+        }
+
+        .market-news-ticker {
+            background: rgba(0, 242, 254, 0.05); border: 1px dashed rgba(0, 242, 254, 0.3);
+            border-radius: 8px; padding: 8px 12px; font-size: 11px; color: var(--accent-blue);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+        }
+
+        .hype-banner {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(249, 115, 22, 0.2));
+            border: 1px solid var(--accent-amber); border-radius: 8px; padding: 10px; margin-bottom: 12px;
+            display: none; text-align: center;
+        }
+
+        .bottom-nav { display: flex; justify-content: space-around; background: var(--panel-bg); padding: 8px 0; border-top: 1px solid rgba(255,255,255,0.06); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+        .nav-item { color: var(--text-muted); text-align: center; font-size: 10px; font-weight: 600; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--accent-blue); font-weight: 800; }
+        .nav-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+        select { width: 100%; padding: 9px; background: #090e17; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; outline: none; font-size: 12px; }
+
+        #custom-modal-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center; padding: 20px; }
+        #custom-modal-box { background: var(--panel-bg); border: 1px solid var(--accent-blue); border-radius: 14px; padding: 20px; width: 100%; text-align: center; box-shadow: 0 0 25px rgba(0,242,254,0.15); }
+        #modal-title { margin: 0 0 10px 0; color: #fff; font-size: 18px; }
+        #modal-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <!-- SİNEMATİK AÇILIŞ (SPLASH SCREEN) -->
+        <div id="intro-splash-screen" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050814; z-index: 999999; display: flex; justify-content: center; align-items: center; transition: opacity 1.2s ease; overflow: hidden;">
+            <div id="particle-container" style="position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
+            <h1 id="intro-logo" style="font-size: 75px; font-weight: 900; color: #fff; font-family: sans-serif; letter-spacing: 6px; opacity: 0; transform: scale(0.6); transition: all 1.8s cubic-bezier(0.19, 1, 0.22, 1); z-index: 2;">CTS</h1>
+        </div>
+
+        <!-- ÖZEL MODAL SİSTEMİ -->
+        <div id="custom-modal-overlay">
+            <div id="custom-modal-box">
+                <h3 id="modal-title">BAŞLIK</h3>
+                <p id="modal-desc">Açıklama metni.</p>
+                <div id="modal-buttons" style="display: flex; gap: 10px; justify-content: center;"></div>
+            </div>
+        </div>
+
+        <!-- 1. OYUNCU GİRİŞ / KAYIT EKRANI -->
+        <div id="auth-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 38, 0.95); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(10px); transition: opacity 0.5s ease;">
+            <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid #00f2fe; border-radius: 16px; padding: 30px; width: 85%; max-width: 380px; text-align: center; box-shadow: 0 0 30px rgba(0, 242, 254, 0.2); position: relative; overflow: hidden;">
+                
+                <div style="margin-bottom: 15px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 48px; height: 48px; animation: pulse-network 2s infinite alternate; filter: drop-shadow(0 0 10px rgba(0,242,254,0.8));">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </div>
+                
+                <h2 style="color: #00f2fe; margin-bottom: 5px; font-size: 20px; font-weight: 900; letter-spacing: 1px;">CTS TYCOON AĞI</h2>
+                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 20px;">Milyarderler kulübüne katılmak için giriş yap veya kayıt ol.</p>
+                
+                <div style="position: relative; height: 75px; margin-bottom: 15px;">
+                    <div class="info-slide" style="animation-delay: 0s;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(16,185,129,0.6)); margin-bottom: 5px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;"><b>$50.000</b> sermaye ile başla,<br>7 kıtada teknoloji devini kur!</p>
+                    </div>
+                    <div class="info-slide" style="animation-delay: 5s;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(251,191,36,0.6)); margin-bottom: 5px;"><polygon points="2 20 22 20 19 6 15 12 12 4 9 12 5 6 2 20"></polygon></svg>
+                        <p style="color: #cbd5e1; font-size: 12px; margin: 0; line-height: 1.4;">Fabrikanı geliştir,<br><b>otomasyon</b> ile saniyede binlerce telefon üret.</p>
+                    </div>
+                </div>
+                
+                <input type="email" id="auth-email-input" placeholder="E-Posta Adresi" style="width: 100%; padding: 14px; background: #050814; border: 1px solid #334155; color: #fff; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 12px; box-sizing: border-box; transition: 0.3s;" onfocus="this.style.borderColor='#00f2fe';" onblur="this.style.borderColor='#334155';">
+                <input type="password" id="auth-password-input" placeholder="Şifre (En az 6 hane)" style="width: 100%; padding: 14px; background: #050814; border: 1px solid #334155; color: #fff; border-radius: 10px; font-size: 14px; outline: none; margin-bottom: 8px; box-sizing: border-box; transition: 0.3s;" onfocus="this.style.borderColor='#00f2fe';" onblur="this.style.borderColor='#334155';">
+                
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <a href="#" onclick="resetFirebasePassword(); return false;" style="color: #00f2fe; font-size: 12px; text-decoration: none; font-weight: 700; opacity: 0.8; transition: 0.3s;">Şifremi Unuttum?</a>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button id="btn-login" onclick="loginFirebase()" style="width: 100%; padding: 14px; background: #00f2fe; color: #000; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3); transition: 0.2s;">GİRİŞ YAP</button>
+                    <button id="btn-register" onclick="registerFirebase()" style="width: 100%; padding: 14px; background: rgba(168, 85, 247, 0.05); color: #c084fc; border: 1px solid #a855f7; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 14px; box-shadow: inset 0 0 10px rgba(168,85,247,0.1), 0 5px 15px rgba(168, 85, 247, 0.15); transition: 0.2s;">YENİ HESAP OLUŞTUR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ANA MENÜ EKRANI -->
+        <div id="main-menu-overlay">
+            <div class="menu-title">PHONE FACTORY<span class="menu-subtitle">TYCOON</span></div>
+            <div class="menu-buttons">
+                <button class="menu-btn btn-start" onclick="closeMainMenu()">SİMÜLASYONU BAŞLAT</button>
+                <button class="menu-btn btn-purple" onclick="openProfile()">PROFİL & İSTATİSTİKLER</button>
+                <button class="menu-btn btn-amber" onclick="openLeaderboard()">🌐 KÜRESEL LİDERLİK TABLOSU</button>
+                <button class="menu-btn btn-amber" onclick="showModal('BAŞARIMLAR', '🏆 İlk 1.000 Telefonu Üret!<br>🏆 7 Kıtada Pazar Ele Geçir!<br>🏆 Kendi Yapay Zekanı Kur!', 'info')">🏆 BAŞARIMLAR VE HEDEFLER</button>
+                <button class="menu-btn btn-dark" onclick="openSettingsModal()">AYARLAR</button>
+                <button class="menu-btn btn-danger" onclick="logoutFirebase()">ÇIKIŞ YAP</button>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 1px;">POWERED BY <strong style="color: var(--accent-blue);">CYBER TYCOON STUDİO</strong></div>
+        </div>
+
+        <!-- 3. PROFİL EKRANI -->
+        <div id="profile-overlay">
+            <div style="width: 100%; flex-direction: column; align-items: center; display: flex;">
+                <div class="profile-title">YATIRIMCI PROFİLİ</div>
+                <div class="profile-username" id="prof-username">GİRİŞİMCİ ✎</div>
+                <div class="profile-uid-badge" id="prof-uid">#UID</div>
+                
+                <div id="profile-verification-status" style="text-align: center; margin-bottom: 25px;"></div>
+
+                <div class="stat-card">
+                    <span class="stat-title"><span style="color: #00f2fe;">📱</span> TOPLAM ÜRETİM</span>
+                    <span class="stat-value" id="stat-produced">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title"><span style="color: var(--accent-green);">💰</span> ZİRVE VARLIK</span>
+                    <span class="stat-value" id="stat-peak-wealth" style="color: var(--accent-green);">$50,000</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title"><span style="color: var(--accent-amber);">🔬</span> PATENTLİ TASARIM</span>
+                    <span class="stat-value" id="stat-patents">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-title"><span style="color: #ef4444;">🏦</span> ALINAN KREDİLER</span>
+                    <span class="stat-value" id="stat-loans-taken">0</span>
+                </div>
+            </div>
+            <button class="btn-action" onclick="closeProfile()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); margin-top: auto; width: 100%;">ANA MENÜYE DÖN</button>
+        </div>
+
+        <!-- 3.5 LİDERLİK TABLOSU -->
+        <div id="leaderboard-overlay">
+            <div style="width: 100%; flex-direction: column; align-items: center; display: flex;">
+                <div class="profile-title" style="color: var(--accent-amber);">LİDERLİK TABLOSU</div>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 20px;">Dünya çapındaki en büyük teknoloji devleri</p>
+                
+                <div id="leaderboard-list" style="width: 100%; max-height: 400px; overflow-y: auto;">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Yükleniyor...</div>
+                </div>
+            </div>
+            <button class="btn-action" onclick="closeLeaderboard()" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); margin-top: auto; width: 100%;">ANA MENÜYE DÖN</button>
+        </div>
+
+        <!-- 4. OYUN İÇİ ÜST BAR -->
+        <div class="top-bar">
+            <div style="display: flex; align-items: center;">
+                <button class="btn-menu-open" onclick="openMainMenu()">« MENÜ</button>
+                <div>
+                    <div style="font-size: 10px; color: var(--text-muted);">Şirket Kasası</div>
+                    <div class="balance" id="display-money">$50,000</div>
+                    <div class="rate-indicator" id="display-net-rate">+ $0/sn</div>
+                    <div class="debt-text" id="display-debt">Borç: $0</div>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 10px; color: var(--text-muted);">Depo</div>
+                <div style="font-size: 14px; font-weight: bold;" id="display-stock">0 / 500</div>
+                <div style="font-size: 9px; color: var(--accent-blue);" id="sync-indicator">● Bulut Aktif</div>
+            </div>
+        </div>
+
+        <!-- 5. OYUN İÇİ İÇERİK ALANI -->
+        <div class="content-area">
+            
+            <!-- SEKME 1: FABRİKA -->
+            <div id="tab-factory" class="tab-content active">
+                
+                <div class="hype-banner" id="hype-banner">
+                    <div style="font-size: 12px; font-weight: 900; color: var(--accent-amber);">🔥 LANSMAN ÇILGINLIĞI AKTİF!</div>
+                    <div style="font-size: 10px; color: #f8fafc; margin-top: 2px;">Basın Puanı: <b id="display-review-score">9.4/10</b> | Talep ve Satış Fiyatı x3! (<span id="hype-timer">60</span>s)</div>
+                </div>
+
+                <div class="market-news-ticker">
+                    <span>📡</span>
+                    <span id="market-news-text">Küresel çip arzı dengede. Parça tedarik fiyatları normal.</span>
+                </div>
+
+                <!-- GERÇEK MONTAJ HATTI SAHNESİ (Üretildikçe Cihazlar Kayar) -->
+                <div class="conveyor-stage" id="conveyor-stage">
+                    <div class="conveyor-belt-grid"></div>
+                    <div class="conveyor-endpoint">📦</div>
+                </div>
+
+                <!-- Ana Montaj Hattı Kartı -->
+                <div class="factory-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin:0; font-size: 15px;">Otomatik Montaj Hattı</h3>
+                        <span id="display-factory-level" style="font-size:11px; background:rgba(0,242,254,0.15); color:var(--accent-blue); padding:2px 8px; border-radius:10px; font-weight:bold; border:1px solid rgba(0,242,254,0.3);">Seviye 1</span>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Aktif Model: <span id="factory-model-name" style="color: #fff; font-weight: bold;">Giriş Seviyesi (v1)</span></p>
+                    
+                    <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Birim Maliyet:</span> <span id="factory-cost-display" style="color: #ef4444;">-$145</span>
+                    </div>
+                    <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Piyasa Satış Fiyatı:</span> <span id="factory-price-display" style="color: var(--accent-green);">+$310</span>
+                    </div>
+
+                    <div class="assembly-bar"><div class="assembly-fill" id="assembly-fill"></div></div>
+                    
+                    <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                        <button class="btn-action" id="btn-manual-produce" style="background: linear-gradient(135deg, #00f2fe, #0284c7); color:#000; flex: 2;">🛠️ 1x ÜRET</button>
+                        <button class="btn-action" onclick="batchProduce(10)" style="background: rgba(0,242,254,0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); flex: 1; padding: 8px; font-size: 11px;">10x</button>
+                        <button class="btn-action" onclick="batchProduce(50)" style="background: rgba(0,242,254,0.15); border: 1px solid var(--accent-blue); color: var(--accent-blue); flex: 1; padding: 8px; font-size: 11px;">50x</button>
+                    </div>
+
+                    <button class="btn-action" id="btn-sell-all" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 12px;">💰 TÜM DEPOYU SAT</button>
+
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Montaj Otomasyonu: <span id="display-auto-rate" style="color: #fff; font-weight: bold;">0 / sn</span></div>
+                        <button id="btn-upgrade-auto" class="btn-action" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">BANT EKLE (-$1,000)</button>
+                    </div>
+                </div>
+
+                <!-- Fabrika İstasyonları Kartı -->
+                <div class="factory-card" style="text-align: left;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 13px; color: var(--accent-blue);">🏭 Fabrika Donanım & Verimlilik İstasyonları</h4>
+                    
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>OS İmaj & Test İstasyonu:</span>
+                            <span id="display-station-eff" style="color:var(--accent-green); font-weight: bold;">+%0 Değer</span>
+                        </div>
+                        <button id="btn-upgrade-station" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">İSTASYONU GELİŞTİR (-$5,000)</button>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Robotik Montaj Kolu:</span>
+                            <span id="display-robot-level" style="color:var(--accent-blue); font-weight: bold;">Yok</span>
+                        </div>
+                        <button id="btn-upgrade-robot" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ROBOT KOL EKLE (-$12,000)</button>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Lazer Gravür & Kutu Hattı:</span>
+                            <span id="display-packaging-level" style="color:var(--accent-amber); font-weight: bold;">Standart Kutu</span>
+                        </div>
+                        <button id="btn-upgrade-packaging" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">LÜKS KUTULAMA KUR (-$18,000)</button>
+                    </div>
+                </div>
+
+                <!-- Tesis Raporu -->
+                <div class="factory-card" style="text-align: left;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 12px; color: var(--text-muted);">📊 Tesis Performans Raporu</h4>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span>Saatlik Üretim Kapasitesi:</span>
+                        <span id="display-hourly-capacity" style="color: #fff; font-weight:bold;">0 Adet</span>
+                    </div>
+                    <div style="font-size: 11px; display: flex; justify-content: space-between;">
+                        <span>Bant Doluluk / Akış Durumu:</span>
+                        <span id="display-conveyor-status" style="color: var(--accent-green); font-weight:bold;">Boşta</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SEKME 2: AR-GE VE TASARIM -->
+            <div id="tab-rd" class="tab-content">
+                <div class="factory-card" style="text-align: left;">
+                    <h3 style="margin: 0 0 12px 0; text-align: center;">Donanım Mimarisi & Patent</h3>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">İşlemci (Yonga Seti)</label>
+                        <select id="select-cpu">
+                            <option value="20,40">Dört Çekirdek Standart (+$20)</option>
+                            <option value="60,140">Sekiz Çekirdek Oyun Odaklı (+$60)</option>
+                            <option value="150,380">3nm Yapay Zeka Nöral Çip (+$150)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Ekran Teknolojisi</label>
+                        <select id="select-screen">
+                            <option value="15,30">60Hz Standart IPS Panel (+$15)</option>
+                            <option value="45,110">120Hz Canlı OLED Panel (+$45)</option>
+                            <option value="100,260">Katlanabilir Ultra İnce Panel (+$100)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Kamera Kurulumu</label>
+                        <select id="select-camera">
+                            <option value="15,30">Tek Lens Standart Sensör (+$15)</option>
+                            <option value="40,90">Üçlü Yapay Zeka Destekli Lens (+$40)</option>
+                            <option value="110,280">Periskop Optik Yakınlaştırma (+$110)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Kasa Materyali</label>
+                        <select id="select-body">
+                            <option value="10,20">Geri Dönüştürülmüş Plastik (+$10)</option>
+                            <option value="35,75">Havacılık Sınıfı Alüminyum (+$35)</option>
+                            <option value="80,200">Dövme Titanyum Çerçeve (+$80)</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Batarya Tipi</label>
+                        <select id="select-battery">
+                            <option value="10,20">4000 mAh Standart Pil (+$10)</option>
+                            <option value="30,65">5500 mAh Hızlı Şarjlı Pil (+$30)</option>
+                            <option value="70,160">Grafen Katı Hal Batarya (+$70)</option>
+                        </select>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>Temel Birim Maliyet:</span> <span id="preview-cost" style="color: #ef4444;">-$145</span>
+                        </div>
+                        <div style="font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>Piyasa Taban Değeri:</span> <span id="preview-price" style="color: var(--accent-green);">+$310</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--accent-amber);" id="patent-badge">Patent Uygunluğu: Standart Cihaz</div>
+                    </div>
+
+                    <button class="btn-action" id="btn-apply-design" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); margin-bottom: 15px;">MİMARİYİ ONAYLA & LANSMAN YAP</button>
+
+                    <h4 style="margin: 15px 0 8px 0; color: var(--accent-blue); font-size: 13px;">Yazılım & Ekosistem Katmanı</h4>
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Özel CTS OS İşletim Sistemi:</span>
+                            <span id="os-status" style="color:var(--accent-green); font-weight:bold;">Açık Kaynak (v0)</span>
+                        </div>
+                        <button id="btn-upgrade-os" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">ÖZEL OS GELİŞTİR (-$20,000)</button>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Yapay Zeka (AI) Asistan:</span>
+                            <span id="ai-status" style="color:var(--text-muted); font-weight:bold;">Yok</span>
+                        </div>
+                        <button id="btn-upgrade-ai" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">YAPAY ZEKA ENTEGRE ET (-$45,000)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKME 3: 7 KITA PAZAR HAKİMİYETİ -->
+            <div id="tab-market" class="tab-content">
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; text-align: center;">Kıtalardaki pazar payın küresel satış fiyatına doğrudan çarpan ekler.</div>
+                
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌎 Kuzey Amerika</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Gelir Çarpanı: 1.5x</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-NA"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-NA" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('NA', 8000, 4)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$8K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('NA', 16000, 8)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$16K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌍 Avrupa</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Gelir Çarpanı: 1.3x</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-EU"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-EU" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('EU', 5000, 5)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$5K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('EU', 10000, 10)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$10K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌏 Asya</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Devasa Hacim</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-ASIA"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-ASIA" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('ASIA', 12000, 5)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$12K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('ASIA', 25000, 12)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$25K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌎 Güney Amerika</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Gelişmekte Olan</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-SA"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-SA" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('SA', 4000, 6)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$4K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('SA', 8000, 12)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$8K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌍 Afrika</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Yüksek Büyüme Hızı</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-AF"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-AF" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('AF', 3000, 7)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$3K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('AF', 6000, 14)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$6K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">🌏 Okyanusya</h3>
+                        <span style="font-size:10px; color:var(--text-muted);">Yüksek Alım Gücü</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-OC"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>Pazar Payı:</span> <span id="share-text-OC" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('OC', 6000, 6)" style="background: #1e293b; padding: 8px; font-size: 11px;">REKLAM (-$6K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('OC', 12000, 12)" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; padding: 8px; font-size: 11px; color:#f87171;">FİYAT SAVAŞI (-$12K)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <h3 style="margin: 0; font-size: 14px;">❄️ Antarktika</h3>
+                        <span style="font-size:10px; color:var(--accent-blue);">Kutup Araştırma Ağı</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="share-bar-AN"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:8px;">
+                        <span>İstasyon Sözleşmesi:</span> <span id="share-text-AN" style="color:var(--accent-blue);">%0</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-action" onclick="buyMarketShare('AN', 15000, 10)" style="background: #1e293b; padding: 8px; font-size: 11px;">UYDU HATTI (-$15K)</button>
+                        <button class="btn-action" onclick="wagePriceWar('AN', 30000, 25)" style="background: rgba(0,242,254,0.2); border: 1px solid var(--accent-blue); padding: 8px; font-size: 11px; color:var(--accent-blue);">ÖZEL ANLAŞMA (-$30K)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKME 4: YÖNETİM -->
+            <div id="tab-management" class="tab-content">
+                <div class="factory-card" style="text-align: left;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: var(--accent-amber);">📦 Depo & Lojistik Ağı</h3>
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+                        <div style="font-size: 12px; margin-bottom: 8px;">Maksimum Depo: <span id="manage-stock-limit" style="color: #fff; font-weight:bold;">500</span></div>
+                        <button class="btn-action" id="btn-upgrade-warehouse" style="background: var(--accent-amber); color: #000;">DEPO GENİŞLET (-$2,500)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: var(--accent-purple);">👥 Kurumsal Personel Departmanı</h3>
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Montaj Mühendisleri (Hız + Maliyet):</span>
+                            <span id="display-engineers" style="color:#fff; font-weight:bold;">0 Ekip</span>
+                        </div>
+                        <button id="btn-hire-engineer" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">MÜHENDİS AL (-$8,000)</button>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Pazarlama Direktörü (Pazar Kaybını Önler):</span>
+                            <span id="display-marketers" style="color:var(--accent-green); font-weight:bold;">Yok</span>
+                        </div>
+                        <button id="btn-hire-marketer" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">DİREKTÖR İŞE AL (-$25,000)</button>
+                    </div>
+                </div>
+
+                <div class="factory-card" style="text-align: left;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #ef4444;">🏦 Banka, Tahvil & Kredi</h3>
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Nakit sıkışıklığında banka hattını kullan (Faiz: %5/dk)</div>
+                        <button class="btn-action" id="btn-take-loan" style="background: #1e293b; padding: 8px; font-size: 11px; margin-bottom: 6px;">$50,000 KREDİ ÇEK</button>
+                        <button class="btn-action" id="btn-pay-loan" style="background: #ef4444; padding: 8px; font-size: 11px; display: none;">BORCU KAPAT</button>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px;">
+                            <span>Holding Şirket Tahvili (Pasif Faiz):</span>
+                            <span id="display-bonds" style="color:var(--accent-green); font-weight:bold;">$0 Tahvil</span>
+                        </div>
+                        <button id="btn-buy-bond" class="btn-action" style="background: #1e293b; padding: 8px; font-size: 11px;">$10,000 TAHVİL AL (+$50/sn)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKME 5: MAĞAZA -->
+            <div id="tab-shop" class="tab-content">
+                <div class="factory-card" style="text-align: left;">
+                    <h3 style="margin: 0 0 4px 0; color: var(--accent-blue); text-align:center;">Tycoon Mağazası</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); text-align:center; margin-bottom: 15px;">Özel lisanslar, holding yatırımları ve sponsorlar</p>
+
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent-green); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-green); margin-bottom: 4px;">🎬 Sponsor Hibe Fonu</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Kasana anında hibe destek fonu aktar.</div>
+                        <button class="btn-action" onclick="watchRewardAd()" style="background: var(--accent-green); color: #000; font-size: 12px;">İZLE (+$25,000)</button>
+                    </div>
+
+                    <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid var(--accent-blue); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-blue); margin-bottom: 4px;">⚡ 2X Montaj Hızı</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Tüm bant üretim kapasitesini 2 katına çıkarır.</div>
+                        <button class="btn-action" onclick="buyIAP('speed')" style="background: var(--accent-blue); color: #000; font-size: 12px;">SATIN AL (₺39.99)</button>
+                    </div>
+
+                    <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid var(--accent-amber); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-amber); margin-bottom: 4px;">🕵️ Endüstriyel Casusluk Lisansı</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Rakiplerin pazar saldırılarını %100 oranında engeller.</div>
+                        <button class="btn-action" onclick="buyIAP('spy')" style="background: var(--accent-amber); color: #000; font-size: 12px;">LİSANS AL (₺59.99)</button>
+                    </div>
+
+                    <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid var(--accent-purple); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+                        <div style="font-weight: 800; font-size: 13px; color: var(--accent-purple); margin-bottom: 4px;">👑 VIP Holding Paketi</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">$500,000 nakit ve sınırsız +5,000 depo kapasitesi.</div>
+                        <button class="btn-action" onclick="buyIAP('vip')" style="background: var(--accent-purple); color: #fff; font-size: 12px;">SATIN AL (₺99.99)</button>
+                    </div>
+
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 10px;">
+                        <div style="font-weight: 800; font-size: 13px; color: #fff; margin-bottom: 4px;">☕ Geliştiriciye Kahve Ismarla</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Cyber Tycoon Studio'ya bağımsız oyun desteği sağla.</div>
+                        <button class="btn-action" onclick="buyIAP('coffee')" style="background: #334155; color: #fff; font-size: 12px;">ISMARLA (₺19.99)</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 6. ALT NAVİGASYON -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('factory', this)"><span class="nav-icon">🏭</span>Fabrika</div>
+            <div class="nav-item" onclick="switchTab('rd', this)"><span class="nav-icon">🔬</span>Ar-Ge</div>
+            <div class="nav-item" onclick="switchTab('market', this)"><span class="nav-icon">🌍</span>Pazar</div>
+            <div class="nav-item" onclick="switchTab('management', this)"><span class="nav-icon">💼</span>Yönetim</div>
+            <div class="nav-item" onclick="switchTab('shop', this)"><span class="nav-icon">💎</span>Mağaza</div>
+        </div>
+
+    </div>
+
+    <script>
+        // =========================================================
+        // FIREBASE YAPILANDIRMASI
+        // =========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBoPk43LcT9qPtZkXXpyrfRpdJmWDnvrA",
+            authDomain: "cts-tycoon.firebaseapp.com",
+            databaseURL: "https://cts-tycoon-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "cts-tycoon",
+            storageBucket: "cts-tycoon.firebasestorage.app",
+            messagingSenderId: "4333586201",
+            appId: "1:4333586201:web:8535dcd2345ec8ae272788"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // --- SES SİSTEMİ ---
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.1) {
+            if (!soundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSound(name) {
+            if (name === 'produce') playTone(587.33, 'triangle', 0.08, 0.15);
+            if (name === 'sell') {
+                playTone(523.25, 'sine', 0.08, 0.15);
+                setTimeout(() => playTone(659.25, 'sine', 0.12, 0.15), 60);
+                setTimeout(() => playTone(783.99, 'sine', 0.16, 0.15), 120);
+            }
+            if (name === 'upgrade') {
+                playTone(440, 'sine', 0.08, 0.15);
+                setTimeout(() => playTone(880, 'sine', 0.15, 0.15), 70);
+            }
+            if (name === 'click') playTone(300, 'triangle', 0.04, 0.08);
+            if (name === 'hype') {
+                playTone(880, 'sine', 0.1, 0.2);
+                setTimeout(() => playTone(1174.66, 'sine', 0.2, 0.25), 80);
+            }
+        }
+
+        // --- OYUN DEĞİŞKENLERİ ---
+        let money = 50000; 
+        let stock = 0; 
+        let maxStock = 500;
+        let baseCostPerUnit = 145; 
+        let baseSellPrice = 310;
+        let autoProduceRate = 0; 
+        let autoUpgradeCost = 1000; 
+        let warehouseUpgradeCost = 2500;
+        
+        let stationLevel = 1;
+        let stationUpgradeCost = 5000;
+        let robotLevel = 0;
+        let robotUpgradeCost = 12000;
+        let packagingLevel = 0;
+        let packagingUpgradeCost = 18000;
+
+        let engineerCount = 0;
+        let engineerCost = 8000;
+        let hasMarketer = false;
+        let marketerCost = 25000;
+        let bondInvestment = 0;
+        let hasSpyLicense = false;
+
+        let patentCount = 0;
+        let patentBonusMultiplier = 1;
+        let osLevel = 0;
+        let osUpgradeCost = 20000;
+        let aiLevel = 0;
+        let aiUpgradeCost = 45000;
+        
+        let chipCrisisMultiplier = 1;
+        let debt = 0; 
+        let speedMultiplier = 1; 
+        let vibrationEnabled = true;
+
+        let markets = {
+            NA: 0, EU: 0, ASIA: 0, SA: 0, AF: 0, OC: 0, AN: 0
+        };
+
+        let stats = { totalProduced: 0, peakWealth: 50000, peakMarket: 0, loansTaken: 0 };
+        let lastSaveTime = Date.now();
+
+        let isHypeActive = false;
+        let hypeMultiplier = 1;
+        let hypeTimeRemaining = 0;
+
+        function showModal(title, text, type = 'info', onConfirm = null) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerHTML = text;
+            const btnArea = document.getElementById('modal-buttons');
+            btnArea.innerHTML = '';
+            
+            if (type === 'confirm') {
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'btn-action'; btnCancel.style.background = '#334155'; btnCancel.style.width = '48%';
+                btnCancel.innerText = 'İPTAL';
+                btnCancel.onclick = () => { playSound('click'); document.getElementById('custom-modal-overlay').style.display = 'none'; };
+                
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn-action'; btnOk.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)'; btnOk.style.width = '48%';
+                btnOk.innerText = 'ONAYLA';
+                btnOk.onclick = () => {
+                    playSound('click');
+                    document.getElementById('custom-modal-overlay').style.display = 'none';
+                    if (onConfirm) onConfirm();
+                };
+                
+                btnArea.appendChild(btnCancel); btnArea.appendChild(btnOk);
+            } else {
+                const btnOk = document.createElement('button');
+                btnOk.className = 'btn-action'; btnOk.style.background = 'linear-gradient(135deg, #00f2fe, #0284c7)';
+                btnOk.innerText = 'TAMAM';
+                btnOk.onclick = () => { playSound('click'); document.getElementById('custom-modal-overlay').style.display = 'none'; };
+                btnArea.appendChild(btnOk);
+            }
+            document.getElementById('custom-modal-overlay').style.display = 'flex';
+        }
+
+        // =========================================================
+        // HİBRİT KAYIT VE SENKRONİZASYON
+        // =========================================================
+        function applyDataToGame(d) {
+            if (!d) return;
+            money = d.money ?? money;
+            stock = d.stock ?? stock;
+            maxStock = d.maxStock ?? maxStock;
+            baseCostPerUnit = d.baseCostPerUnit ?? baseCostPerUnit;
+            baseSellPrice = d.baseSellPrice ?? baseSellPrice;
+            autoProduceRate = d.autoProduceRate ?? autoProduceRate;
+            autoUpgradeCost = d.autoUpgradeCost ?? autoUpgradeCost;
+            warehouseUpgradeCost = d.warehouseUpgradeCost ?? warehouseUpgradeCost;
+            stationLevel = d.stationLevel ?? stationLevel;
+            stationUpgradeCost = d.stationUpgradeCost ?? stationUpgradeCost;
+            robotLevel = d.robotLevel ?? robotLevel;
+            robotUpgradeCost = d.robotUpgradeCost ?? robotUpgradeCost;
+            packagingLevel = d.packagingLevel ?? packagingLevel;
+            packagingUpgradeCost = d.packagingUpgradeCost ?? packagingUpgradeCost;
+            engineerCount = d.engineerCount ?? engineerCount;
+            engineerCost = d.engineerCost ?? engineerCost;
+            hasMarketer = d.hasMarketer ?? hasMarketer;
+            bondInvestment = d.bondInvestment ?? bondInvestment;
+            hasSpyLicense = d.hasSpyLicense ?? hasSpyLicense;
+            patentCount = d.patentCount ?? patentCount;
+            patentBonusMultiplier = d.patentBonusMultiplier ?? patentBonusMultiplier;
+            osLevel = d.osLevel ?? osLevel;
+            aiLevel = d.aiLevel ?? aiLevel;
+            debt = d.debt ?? debt;
+            if (d.markets) markets = Object.assign(markets, d.markets);
+            if (d.stats) stats = Object.assign(stats, d.stats);
+            updateUI();
+        }
+
+        function saveGame() {
+            const displayName = (auth && auth.currentUser) ? (auth.currentUser.displayName || auth.currentUser.email.split('@')[0].toUpperCase()) : "Girişimci";
+            const saveData = {
+                username: displayName,
+                money, stock, maxStock, baseCostPerUnit, baseSellPrice,
+                autoProduceRate, autoUpgradeCost, warehouseUpgradeCost,
+                stationLevel, stationUpgradeCost, robotLevel, robotUpgradeCost,
+                packagingLevel, packagingUpgradeCost,
+                engineerCount, engineerCost, hasMarketer, bondInvestment, hasSpyLicense,
+                patentCount, patentBonusMultiplier, osLevel, aiLevel,
+                debt, markets, stats,
+                lastActive: Date.now()
+            };
+
+            localStorage.setItem('pft_local_save', JSON.stringify(saveData));
+
+            if (auth && auth.currentUser) {
+                const uid = auth.currentUser.uid;
+                database.ref('phone_factory_saves/' + uid).set(saveData);
+                database.ref('phone_factory_leaderboard/' + uid).set({
+                    username: displayName,
+                    wealth: stats.peakWealth,
+                    produced: stats.totalProduced,
+                    updatedAt: Date.now()
+                }).then(() => {
+                    const syncEl = document.getElementById('sync-indicator');
+                    if (syncEl) syncEl.innerText = "● Bulut Senkron";
+                }).catch(() => {
+                    const syncEl = document.getElementById('sync-indicator');
+                    if (syncEl) syncEl.innerText = "○ Yerel Kayıt";
+                });
+            }
+        }
+
+        const cachedSave = localStorage.getItem('pft_local_save');
+        if (cachedSave) {
+            try { applyDataToGame(JSON.parse(cachedSave)); } catch(e) {}
+        }
+
+        function loadCloudData(uid) {
+            database.ref('phone_factory_saves/' + uid).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const d = snapshot.val();
+                    applyDataToGame(d);
+                    localStorage.setItem('pft_local_save', JSON.stringify(d));
+
+                    if (d.lastActive && autoProduceRate > 0) {
+                        let secondsOffline = Math.min(86400, Math.floor((Date.now() - d.lastActive) / 1000));
+                        if (secondsOffline > 30) {
+                            let potentialProduce = secondsOffline * autoProduceRate;
+                            let availableSpace = maxStock - stock;
+                            let actualOfflineProduce = Math.min(potentialProduce, availableSpace);
+                            let unitCost = getEffectiveUnitCost();
+                            let maxAffordable = Math.floor(money / unitCost);
+                            actualOfflineProduce = Math.min(actualOfflineProduce, maxAffordable);
+
+                            if (actualOfflineProduce > 0) {
+                                money -= (actualOfflineProduce * unitCost);
+                                stock += actualOfflineProduce;
+                                stats.totalProduced += actualOfflineProduce;
+                                showModal("HOŞ GELDİNİZ!", `Çevrimdışıyken fabrikalarınız çalışmaya devam etti.<br><br>⏱️ Geçen Süre: <b>${Math.floor(secondsOffline / 60)} dk</b><br>📦 Üretilen: <b>+${actualOfflineProduce} Telefon</b>`, "info");
+                            }
+                        }
+                    }
+                    updateUI();
+                }
+            });
+        }
+
+        // --- GERÇEK FİZİKSEL KONVEYÖR ANİMASYON MOTORU ---
+        // Sadece gerçek üretim yapıldığında ekranda kayar, boşta durur
+        function spawnPhoneOnConveyor() {
+            const stage = document.getElementById('conveyor-stage');
+            if (!stage) return;
+
+            const phone = document.createElement('div');
+            phone.innerText = '📱';
+            phone.style.cssText = `
+                position: absolute;
+                left: -25px;
+                font-size: 20px;
+                top: 13px;
+                transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
+                z-index: 1;
+                pointer-events: none;
+            `;
+            stage.appendChild(phone);
+
+            // Cihazı bant boyunca kutuya doğru kaydır
+            setTimeout(() => {
+                phone.style.transform = `translateX(${stage.clientWidth - 20}px) scale(0.9)`;
+            }, 20);
+
+            // Depo kutusuna girdiğinde kaybolsun
+            setTimeout(() => {
+                phone.style.opacity = '0';
+                setTimeout(() => { if (phone.parentNode) phone.parentNode.removeChild(phone); }, 200);
+            }, 820);
+        }
+
+        function triggerAssemblyProgress() {
+            const fill = document.getElementById('assembly-fill');
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+            setTimeout(() => {
+                fill.style.transition = 'width 0.25s ease-out';
+                fill.style.width = '100%';
+                setTimeout(() => { fill.style.width = '0%'; }, 250);
+            }, 10);
+        }
+
+        // --- SİNEMATİK AÇILIŞ VE DİNLENME ---
+        window.addEventListener('load', () => {
+            const container = document.getElementById('particle-container');
+            for (let i = 0; i < 150; i++) {
+                let p = document.createElement('div');
+                let s = Math.random() * 9 + 1;
+                p.style.cssText = `position:absolute; top:50%; left:50%; width:${s}px; height:${s}px; background:#00f2fe; border-radius:50%; --tx:${(Math.random()-0.5)*500}px; --ty:${(Math.random()-0.5)*900}px; --s:${Math.random()*2+0.8}; animation: dustFloat ${Math.random()*1.8+0.8}s forwards; animation-delay: ${Math.random()*0.25}s;`;
+                container.appendChild(p);
+            }
+
+            setTimeout(() => { 
+                document.getElementById('intro-logo').style.opacity = '1'; 
+                document.getElementById('intro-logo').style.transform = 'scale(1)'; 
+            }, 200);
+            
+            auth.onAuthStateChanged((user) => {
+                setTimeout(() => { 
+                    document.getElementById('intro-splash-screen').style.opacity = '0'; 
+                    setTimeout(() => { document.getElementById('intro-splash-screen').style.display = 'none'; }, 1200);
+                }, 2500);
+
+                if (user) {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    document.getElementById('main-menu-overlay').style.display = 'flex';
+                    
+                    let uidHash = "#" + user.uid.substring(0, 8).toUpperCase();
+                    let displayName = user.displayName || user.email.split('@')[0].toUpperCase();
+                    
+                    document.getElementById('prof-username').innerText = displayName + " ✎";
+                    document.getElementById('prof-uid').innerText = uidHash;
+                    
+                    const verifStatus = document.getElementById('profile-verification-status');
+                    if (user.emailVerified) {
+                        verifStatus.innerHTML = '<div style="color: #10b981; font-size: 11px; font-weight: bold;">✓ E-Posta Doğrulandı</div>';
+                    } else {
+                        verifStatus.innerHTML = '<div style="color: #ef4444; font-size: 11px; font-weight: bold; margin-bottom: 4px;">⚠️ E-Posta Doğrulanmadı</div><a href="#" style="color: #00f2fe; font-size: 10px; text-decoration: none;" onclick="sendFirebaseVerification()">(Doğrulamayı Tekrar Gönder)</a>';
+                    }
+
+                    loadCloudData(user.uid);
+                } else {
+                    document.getElementById('auth-overlay').style.display = 'flex';
+                    document.getElementById('main-menu-overlay').style.display = 'none';
+                }
+            });
+        });
+
+        // --- LİDERLİK TABLOSU ---
+        function openLeaderboard() {
+            playSound('click');
+            document.getElementById('main-menu-overlay').style.display = 'none';
+            document.getElementById('leaderboard-overlay').style.display = 'flex';
+            
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Sıralama sunucudan çekiliyor...</div>';
+
+            database.ref('phone_factory_leaderboard').orderByChild('wealth').limitToLast(20).once('value').then((snapshot) => {
+                listEl.innerHTML = '';
+                let leaders = [];
+                snapshot.forEach((child) => { leaders.push(child.val()); });
+                leaders.reverse();
+
+                if (leaders.length === 0) {
+                    listEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">Henüz liderlik kaydı yok.</div>';
+                    return;
+                }
+
+                leaders.forEach((item, index) => {
+                    let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
+                    let itemDiv = document.createElement('div');
+                    itemDiv.className = 'leader-item';
+                    itemDiv.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:900; color:var(--accent-amber);">${medal}</span>
+                            <span style="font-weight:bold; color:#fff;">${item.username || "Girişimci"}</span>
+                        </div>
+                        <div style="color:var(--accent-green); font-weight:800;">$${Math.floor(item.wealth || 0).toLocaleString()}</div>
+                    `;
+                    listEl.appendChild(itemDiv);
+                });
+            }).catch(() => {
+                listEl.innerHTML = '<div style="text-align: center; color: #ef4444; font-size: 12px;">Sıralama verileri alınamadı.</div>';
+            });
+        }
+
+        function closeLeaderboard() {
+            playSound('click');
+            document.getElementById('leaderboard-overlay').style.display = 'none';
+            document.getElementById('main-menu-overlay').style.display = 'flex';
+        }
+
+        // --- AUTH FONKSİYONLARI ---
+        function loginFirebase() {
+            playSound('click');
+            const rawEmail = document.getElementById('auth-email-input').value;
+            const pass = document.getElementById('auth-password-input').value;
+            const email = rawEmail ? rawEmail.trim().toLowerCase() : "";
+
+            if (!email || !pass) { showModal("HATA", "Lütfen tüm alanları doldurun.", "info"); return; }
+            auth.signInWithEmailAndPassword(email, pass).then(() => {
+                playSound('upgrade');
+                showModal("GİRİŞ BAŞARILI", "Cyber Tycoon ağına bağlanıldı.", "info");
+            }).catch((error) => { showModal("HATA", error.message, "info"); });
+        }
+
+        function registerFirebase() {
+            playSound('click');
+            const rawEmail = document.getElementById('auth-email-input').value;
+            const pass = document.getElementById('auth-password-input').value;
+            const email = rawEmail ? rawEmail.trim().toLowerCase() : "";
+
+            if (!email || !pass) { showModal("HATA", "Lütfen tüm alanları doldurun.", "info"); return; }
+            if (pass.length < 6) { showModal("HATA", "Şifre en az 6 karakter olmalıdır.", "info"); return; }
+            
+            auth.createUserWithEmailAndPassword(email, pass).then((cred) => {
+                playSound('upgrade');
+                let displayName = email.split('@')[0].toUpperCase();
+                cred.user.updateProfile({ displayName: displayName }).then(() => {
+                    cred.user.sendEmailVerification();
+                    showModal("KAYIT BAŞARILI", "Hesabınız oluşturuldu. Doğrulama e-postası gönderildi.", "info");
+                });
+            }).catch((error) => { showModal("HATA", error.message, "info"); });
+        }
+
+        function logoutFirebase() {
+            playSound('click');
+            showModal("ÇIKIŞ YAP", "Ağdan koparılacaksın. Emin misin?", "confirm", () => {
+                saveGame();
+                auth.signOut().then(() => { location.reload(); });
+            });
+        }
+
+        function resetFirebasePassword() {
+            playSound('click');
+            const rawEmail = document.getElementById('auth-email-input').value;
+            const email = rawEmail ? rawEmail.trim().toLowerCase() : "";
+            if (!email) { showModal("HATA", "Lütfen e-posta kutusuna adresinizi yazın.", "info"); return; }
+            auth.sendPasswordResetEmail(email).then(() => {
+                showModal("ŞİFRE SIFIRLAMA", "E-postanıza bağlantı gönderildi.", "info");
+            }).catch((err) => { showModal("HATA", err.message, "info"); });
+        }
+
+        function sendFirebaseVerification() {
+            if (auth.currentUser) {
+                auth.currentUser.sendEmailVerification().then(() => {
+                    showModal("DOĞRULAMA", "Doğrulama bağlantısı e-postana gönderildi.", "info");
+                });
+            }
+        }
+
+        // --- MENÜ VE ARAYÜZ ---
+        function closeMainMenu() { playSound('click'); document.getElementById('main-menu-overlay').style.display = 'none'; }
+        function openMainMenu() { playSound('click'); document.getElementById('main-menu-overlay').style.display = 'flex'; }
+        function openProfile() {
+            playSound('click');
+            document.getElementById('main-menu-overlay').style.display = 'none';
+            document.getElementById('profile-overlay').style.display = 'flex';
+            document.getElementById('stat-produced').innerText = stats.totalProduced.toLocaleString();
+            document.getElementById('stat-peak-wealth').innerText = "$" + Math.floor(stats.peakWealth).toLocaleString();
+            document.getElementById('stat-patents').innerText = patentCount;
+            document.getElementById('stat-loans-taken').innerText = stats.loansTaken;
+        }
+        function closeProfile() {
+            playSound('click');
+            document.getElementById('profile-overlay').style.display = 'none';
+            document.getElementById('main-menu-overlay').style.display = 'flex';
+        }
+
+        function openSettingsModal() {
+            playSound('click');
+            const vText = vibrationEnabled ? "AÇIK" : "KAPALI";
+            const sText = soundEnabled ? "AÇIK" : "KAPALI";
+            showModal("AYARLAR", `Titreşim: <b>${vText}</b> | Ses Efektleri: <b>${sText}</b><br><br>Ayarları değiştirmek için onaylayın.`, "confirm", () => {
+                soundEnabled = !soundEnabled;
+                vibrationEnabled = !vibrationEnabled;
+                if (vibrationEnabled && navigator.vibrate) navigator.vibrate(20);
+                showModal("BİLGİ", "Ses ve Titreşim ayarları güncellendi.", "info");
+            });
+        }
+
+        function switchTab(tabId, element) {
+            playSound('click');
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            if (element) element.classList.add('active');
+        }
+
+        // --- HESAPLAMALAR VE ÇARPANLAR ---
+        function getEffectiveUnitCost() {
+            let engineerDiscount = Math.min(0.30, engineerCount * 0.02);
+            return Math.max(20, Math.floor(baseCostPerUnit * chipCrisisMultiplier * (1 - engineerDiscount)));
+        }
+
+        function getActualSellPrice() {
+            let totalMarketBonus = (markets.NA * 1.5) + (markets.EU * 1.3) + (markets.ASIA * 1.2) + 
+                                   (markets.SA * 1.1) + (markets.AF * 1.0) + (markets.OC * 1.2) + (markets.AN * 2.0);
+            
+            let stationBonus = (stationLevel - 1) * 0.10;
+            let packagingBonus = packagingLevel * 0.15;
+            let ecosystemBonus = (osLevel * 0.15) + (aiLevel * 0.30);
+            return Math.floor(baseSellPrice * (1 + (totalMarketBonus / 100) + stationBonus + packagingBonus + ecosystemBonus) * patentBonusMultiplier * hypeMultiplier);
+        }
+
+        function updateUI() {
+            document.getElementById('display-money').innerText = '$' + Math.floor(money).toLocaleString();
+            document.getElementById('display-stock').innerText = stock + ' / ' + maxStock;
+            
+            let effectiveRate = (autoProduceRate + (engineerCount * 2) + (robotLevel * 5)) * speedMultiplier;
+            document.getElementById('display-auto-rate').innerText = effectiveRate + ' / sn';
+            
+            document.getElementById('display-hourly-capacity').innerText = (effectiveRate * 3600).toLocaleString() + " Adet";
+            
+            // Bant Akış Durumu Metni
+            const statusEl = document.getElementById('display-conveyor-status');
+            if (effectiveRate > 0) {
+                statusEl.innerText = "Aktif (" + effectiveRate + "/sn Akış)";
+                statusEl.style.color = "var(--accent-blue)";
+            } else {
+                statusEl.innerText = "Boşta (Üretim Yok)";
+                statusEl.style.color = "var(--text-muted)";
+            }
+
+            let currentCost = getEffectiveUnitCost();
+            let costPerSec = effectiveRate * currentCost;
+            let passiveSubIncome = (osLevel * 150) + (aiLevel * 450) + (bondInvestment * 0.005);
+            let netCashFlow = passiveSubIncome - costPerSec;
+            
+            let rateEl = document.getElementById('display-net-rate');
+            if (netCashFlow >= 0) {
+                rateEl.innerText = `+ $${Math.floor(netCashFlow).toLocaleString()}/sn`;
+                rateEl.style.color = "var(--accent-green)";
+            } else {
+                rateEl.innerText = `- $${Math.abs(Math.floor(netCashFlow)).toLocaleString()}/sn`;
+                rateEl.style.color = "#ef4444";
+            }
+
+            document.getElementById('btn-upgrade-auto').innerText = `BANT EKLE (-$${autoUpgradeCost.toLocaleString()})`;
+            document.getElementById('display-factory-level').innerText = `Seviye ${stationLevel}`;
+            document.getElementById('display-station-eff').innerText = `+%${(stationLevel - 1) * 10} Değer`;
+            document.getElementById('btn-upgrade-station').innerText = `İSTASYONU GELİŞTİR (-$${stationUpgradeCost.toLocaleString()})`;
+            
+            document.getElementById('display-robot-level').innerText = robotLevel > 0 ? `Seviye ${robotLevel} (+${robotLevel * 5}/sn)` : "Yok";
+            document.getElementById('btn-upgrade-robot').innerText = `ROBOT KOL GELİŞTİR (-$${robotUpgradeCost.toLocaleString()})`;
+
+            document.getElementById('display-packaging-level').innerText = packagingLevel > 0 ? `Özel VIP (Kâr +%${packagingLevel * 15})` : "Standart Kutu";
+            document.getElementById('btn-upgrade-packaging').innerText = `KUTU HATTINI GELİŞTİR (-$${packagingUpgradeCost.toLocaleString()})`;
+
+            document.getElementById('display-engineers').innerText = `${engineerCount} Ekip (-%${Math.min(30, engineerCount * 2)} Maliyet)`;
+            document.getElementById('btn-hire-engineer').innerText = `MÜHENDİS AL (-$${engineerCost.toLocaleString()})`;
+            document.getElementById('display-marketers').innerText = hasMarketer ? "Aktif (Korumalı)" : "Yok";
+            document.getElementById('btn-hire-marketer').style.display = hasMarketer ? "none" : "block";
+            document.getElementById('display-bonds').innerText = `$${bondInvestment.toLocaleString()} Tahvil (+$${Math.floor(bondInvestment * 0.005)}/sn)`;
+
+            document.getElementById('os-status').innerText = osLevel > 0 ? `CTS OS v${osLevel}.0 (+%${osLevel * 15})` : "Açık Kaynak (v0)";
+            document.getElementById('btn-upgrade-os').innerText = `ÖZEL OS GELİŞTİR (-$${osUpgradeCost.toLocaleString()})`;
+            document.getElementById('ai-status').innerText = aiLevel > 0 ? `Cyber AI v${aiLevel}.0 (+%${aiLevel * 30})` : "Yok";
+            document.getElementById('btn-upgrade-ai').innerText = `YAPAY ZEKA ENTEGRE ET (-$${aiUpgradeCost.toLocaleString()})`;
+
+            document.getElementById('manage-stock-limit').innerText = maxStock.toLocaleString();
+            document.getElementById('btn-upgrade-warehouse').innerText = `DEPO GENİŞLET (-$${warehouseUpgradeCost.toLocaleString()})`;
+
+            document.getElementById('factory-cost-display').innerText = `-$${currentCost}`;
+            document.getElementById('factory-price-display').innerText = `+$${getActualSellPrice()}`;
+
+            if (debt > 0) {
+                document.getElementById('display-debt').style.display = 'block';
+                document.getElementById('display-debt').innerText = `Borç: $${Math.floor(debt).toLocaleString()}`;
+                document.getElementById('btn-pay-loan').style.display = 'block';
+                document.getElementById('btn-pay-loan').innerText = `BORCU KAPAT (-$${Math.floor(debt).toLocaleString()})`;
+            } else {
+                document.getElementById('display-debt').style.display = 'none';
+                document.getElementById('btn-pay-loan').style.display = 'none';
+            }
+
+            ['NA','EU','ASIA','SA','AF','OC','AN'].forEach(code => {
+                const elBar = document.getElementById(`share-bar-${code}`);
+                const elTxt = document.getElementById(`share-text-${code}`);
+                if (elBar) elBar.style.width = markets[code] + '%';
+                if (elTxt) elTxt.innerText = '%' + markets[code];
+            });
+        }
+
+        // Toplu Üretim (10x / 50x)
+        function batchProduce(count) {
+            let currentCost = getEffectiveUnitCost();
+            let maxAffordable = Math.floor(money / currentCost);
+            let availableSpace = maxStock - stock;
+            let produceAmount = Math.min(count, maxAffordable, availableSpace);
+
+            if (produceAmount > 0) {
+                money -= (produceAmount * currentCost);
+                stock += produceAmount;
+                stats.totalProduced += produceAmount;
+                
+                // Üretim adedine göre fiziksel cihazları konveyöre yerleştir
+                let visuals = Math.min(produceAmount, 5);
+                for (let i = 0; i < visuals; i++) {
+                    setTimeout(spawnPhoneOnConveyor, i * 150);
+                }
+                
+                triggerAssemblyProgress();
+                playSound('produce');
+                updateUI();
+                saveGame();
+                if (vibrationEnabled && navigator.vibrate) navigator.vibrate(15);
+            } else {
+                showModal("ÜRETİM DURDU", "Yeterli sermayeniz yok veya deponuz tamamen dolu!", "info");
+            }
+        }
+
+        // --- GAME LOOP ---
+        setInterval(() => {
+            let effectiveRate = (autoProduceRate + (engineerCount * 2) + (robotLevel * 5)) * speedMultiplier;
+            let currentCost = getEffectiveUnitCost();
+
+            let passiveIncome = (osLevel * 150) + (aiLevel * 450) + (bondInvestment * 0.005);
+            if (passiveIncome > 0) money += passiveIncome;
+
+            if (effectiveRate > 0 && stock < maxStock && money >= currentCost) {
+                let maxAffordable = Math.floor(money / currentCost);
+                let availableSpace = maxStock - stock;
+                let productionAmount = Math.min(effectiveRate, maxAffordable, availableSpace);
+
+                if (productionAmount > 0) {
+                    money -= (productionAmount * currentCost); 
+                    stock += productionAmount; 
+                    stats.totalProduced += productionAmount;
+                    
+                    // Saniyede 1 görsel cihazı banda yerleştir
+                    spawnPhoneOnConveyor();
+                    triggerAssemblyProgress();
+                    playSound('produce');
+                }
+            }
+            if (debt > 0) { debt += (debt * 0.00083); }
+            if (money > stats.peakWealth) { stats.peakWealth = money; }
+            
+            if (isHypeActive) {
+                hypeTimeRemaining--;
+                document.getElementById('hype-timer').innerText = hypeTimeRemaining;
+                if (hypeTimeRemaining <= 0) {
+                    isHypeActive = false;
+                    hypeMultiplier = 1;
+                    document.getElementById('hype-banner').style.display = 'none';
+                }
+            }
+
+            if (Date.now() - lastSaveTime > 6000) {
+                saveGame();
+                lastSaveTime = Date.now();
+            }
+
+            updateUI();
+        }, 1000);
+
+        // --- PİYASA DALGALANMASI VE RAKİP ATAKLARI (25 SN) ---
+        const marketEvents = [
+            { text: "Tayvan fabrikalarında grev: Çip tedarik fiyatları %25 arttı!", mult: 1.25 },
+            { text: "Küresel lojistik rahatladı: Parça tedarik maliyeti %15 düştü!", mult: 0.85 },
+            { text: "Nadir toprak elementi krizi: Batarya hammadde masrafları arttı.", mult: 1.15 },
+            { text: "Küresel çip arzı dengede. Tedarik fiyatları normal seyrediyor.", mult: 1.0 },
+            { 
+                text: "⚠️ Rakip 'A-Phone' yeni amiral gemisini duyurdu! Pazar payı baskı altında!", 
+                mult: 1.0,
+                action: () => {
+                    if (hasSpyLicense || hasMarketer) {
+                        document.getElementById('market-news-text').innerText = "🛡️ Pazarlama direktörünüz rakip saldırıyı başarıyla püskürttü!";
+                        return;
+                    }
+                    if (markets.EU > 5) {
+                        markets.EU = Math.max(0, markets.EU - 5);
+                        showModal("RAKİP SALDIRISI", "Pazarlama ekibiniz yetersiz kaldı; rakipler Avrupa'da pazar payınızı %5 düşürdü!", "info");
+                    }
+                }
+            }
+        ];
+
+        setInterval(() => {
+            let ev = marketEvents[Math.floor(Math.random() * marketEvents.length)];
+            chipCrisisMultiplier = ev.mult;
+            document.getElementById('market-news-text').innerText = ev.text;
+            if (ev.action) ev.action();
+            updateUI();
+        }, 25000);
+
+        // --- FABRİKA ETKİLEŞİMLERİ ---
+        document.getElementById('btn-manual-produce').addEventListener('pointerdown', (e) => {
+            let currentCost = getEffectiveUnitCost();
+            if (money >= currentCost && stock < maxStock) { 
+                money -= currentCost; 
+                stock++; 
+                stats.totalProduced++; 
+                spawnPhoneOnConveyor();
+                triggerAssemblyProgress();
+                playSound('produce');
+                updateUI();
+                saveGame();
+                if (vibrationEnabled && navigator.vibrate) navigator.vibrate(12);
+            }
+        });
+
+        document.getElementById('btn-sell-all').addEventListener('pointerdown', (e) => {
+            if (stock > 0) { 
+                let gained = stock * getActualSellPrice();
+                money += gained; 
+                stock = 0; 
+                playSound('sell');
+                updateUI();
+                saveGame();
+                if (vibrationEnabled && navigator.vibrate) navigator.vibrate([15, 30, 15]);
+            }
+        });
+
+        document.getElementById('btn-upgrade-auto').addEventListener('pointerdown', (e) => {
+            if (money >= autoUpgradeCost) {
+                money -= autoUpgradeCost; 
+                autoProduceRate += 1; 
+                autoUpgradeCost = Math.floor(autoUpgradeCost * 1.5);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-upgrade-station').addEventListener('pointerdown', (e) => {
+            if (money >= stationUpgradeCost) {
+                money -= stationUpgradeCost;
+                stationLevel++;
+                stationUpgradeCost = Math.floor(stationUpgradeCost * 2.2);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-upgrade-robot').addEventListener('pointerdown', (e) => {
+            if (money >= robotUpgradeCost) {
+                money -= robotUpgradeCost;
+                robotLevel++;
+                robotUpgradeCost = Math.floor(robotUpgradeCost * 2.5);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-upgrade-packaging').addEventListener('pointerdown', (e) => {
+            if (money >= packagingUpgradeCost) {
+                money -= packagingUpgradeCost;
+                packagingLevel++;
+                packagingUpgradeCost = Math.floor(packagingUpgradeCost * 2.8);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        // --- YÖNETİM BUTONLARI ---
+        document.getElementById('btn-hire-engineer').addEventListener('pointerdown', (e) => {
+            if (money >= engineerCost) {
+                money -= engineerCost;
+                engineerCount++;
+                engineerCost = Math.floor(engineerCost * 1.7);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-hire-marketer').addEventListener('pointerdown', (e) => {
+            if (money >= marketerCost && !hasMarketer) {
+                money -= marketerCost;
+                hasMarketer = true;
+                playSound('upgrade');
+                showModal("DİREKTÖR İŞE ALINDI", "Pazarlama direktörü şirkete katıldı! Artık rakip ataklarında pazar payınız korunacak.", "info");
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-buy-bond').addEventListener('pointerdown', (e) => {
+            if (money >= 10000) {
+                money -= 10000;
+                bondInvestment += 10000;
+                playSound('sell');
+                showModal("TAHVİL ALINDI", "Holding portföyüne $10,000 tahvil eklendi. Saniyede +$50 pasif faiz geliri bağlanacak.", "info");
+                updateUI();
+                saveGame();
+            } else {
+                showModal("YETERSİZ BAKİYE", "Tahvil yatırımı için en az $10,000 nakit gereklidir.", "info");
+            }
+        });
+
+        document.getElementById('btn-upgrade-warehouse').addEventListener('pointerdown', (e) => {
+            if (money >= warehouseUpgradeCost) {
+                money -= warehouseUpgradeCost; 
+                maxStock += 500; 
+                warehouseUpgradeCost = Math.floor(warehouseUpgradeCost * 1.8);
+                playSound('upgrade');
+                updateUI();
+                saveGame();
+            }
+        });
+
+        document.getElementById('btn-upgrade-os').addEventListener('pointerdown', (e) => {
+            if (money >= osUpgradeCost) {
+                money -= osUpgradeCost;
+                osLevel++;
+                osUpgradeCost = Math.floor(osUpgradeCost * 2.5);
+                playSound('upgrade');
+                showModal("OS GELİŞTİRİLDİ", `Özel CTS OS v${osLevel}.0 yayınlandı! Satış fiyatları %15 arttı ve abonelik geliri bağlandı!`, "info");
+                updateUI();
+                saveGame();
+            } else {
+                showModal("YETERSİZ BAKİYE", "İşletim sistemi geliştirmek için fon yetersiz.", "info");
+            }
+        });
+
+        document.getElementById('btn-upgrade-ai').addEventListener('pointerdown', (e) => {
+            if (money >= aiUpgradeCost) {
+                money -= aiUpgradeCost;
+                aiLevel++;
+                aiUpgradeCost = Math.floor(aiUpgradeCost * 2.8);
+                playSound('upgrade');
+                showModal("YAPAY ZEKA ENTEGRE EDİLDİ", `Cyber AI v${aiLevel}.0 asistanı telefonlara eklendi! Satış fiyatına +%30 prim geldi!`, "info");
+                updateUI();
+                saveCloudData();
+            } else {
+                showModal("YETERSİZ BAKİYE", "Yapay zeka eğitmek için fon yetersiz.", "info");
+            }
+        });
+
+        document.getElementById('btn-take-loan').addEventListener('pointerdown', (e) => {
+            playSound('click');
+            showModal("KREDİ ONAYI", "Banka hesabınıza $50.000 aktarılacak (Faiz: %5/dk). Onaylıyor musunuz?", "confirm", () => {
+                money += 50000; debt += 50000; stats.loansTaken += 1; 
+                playSound('sell'); updateUI(); saveGame();
+            });
+        });
+
+        document.getElementById('btn-pay-loan').addEventListener('pointerdown', (e) => {
+            playSound('click');
+            if (money >= debt) { 
+                money -= debt; debt = 0; playSound('upgrade'); updateUI(); saveGame();
+            } else { 
+                showModal("BAKİYE YETERSİZ", "Borcu kapatmak için yeterli nakdiniz yok.", "info"); 
+            }
+        });
+
+        // --- 7 KITA PAZAR YÖNETİMİ ---
+        function buyMarketShare(region, cost, gain) {
+            playSound('click');
+            if (money >= cost) {
+                if (markets[region] < 100) {
+                    money -= cost;
+                    markets[region] = Math.min(100, markets[region] + gain);
+                    playSound('upgrade');
+                    updateUI();
+                    saveGame();
+                    if (vibrationEnabled && navigator.vibrate) navigator.vibrate(15);
+                }
+            } else {
+                showModal("YETERSİZ BAKİYE", "Bu bölgede reklam kampanyası başlatacak bütçeniz yok.", "info");
+            }
+        }
+
+        function wagePriceWar(region, cost, gain) {
+            playSound('click');
+            if (money >= cost) {
+                showModal("FİYAT SAVAŞI", `${region} bölgesinde rakiplerin pazarını kırmak için agresif indirim başlatılsın mı?`, "confirm", () => {
+                    money -= cost;
+                    markets[region] = Math.min(100, markets[region] + gain);
+                    playSound('upgrade');
+                    updateUI();
+                    saveGame();
+                    showModal("PAZAR ELE GEÇİRİLDİ", "Bölgedeki rakiplerin payı kırıldı, pazar payınız hızla tırmandı!", "info");
+                });
+            } else {
+                showModal("YETERSİZ SERMAYE", "Fiyat savaşı başlatmak için kasanızda yeterli nakit yok.", "info");
+            }
+        }
+
+        // --- MAĞAZA (SHOP) FONKSİYONLARI ---
+        function watchRewardAd() {
+            playSound('click');
+            showModal("Sponsorlu Reklam", "Reklam yükleniyor... Lütfen bekleyin.", "info");
+            setTimeout(() => {
+                money += 25000; 
+                playSound('sell');
+                updateUI();
+                saveGame();
+                showModal("ÖDÜL KAZANILDI", "Kasaya yatırımcı destek fonundan $25,000 eklendi!", "info");
+            }, 1000);
+        }
+
+        function buyIAP(type) {
+            playSound('click');
+            if (type === 'speed') {
+                speedMultiplier = 2;
+                showModal("SATIN ALIM ONAYI", "2X Fabrika Hızlandırıcısı aktif edildi!", "info");
+            } else if (type === 'spy') {
+                hasSpyLicense = true;
+                showModal("LİSANS AKTİF", "Endüstriyel Casusluk Lisansı devrede! Rakiplerin pazar payı indirme hamleleri engellendi.", "info");
+            } else if (type === 'vip') {
+                money += 500000; maxStock += 5000;
+                showModal("VIP AKTİF", "VIP Holding Paketi aktif edildi: Kasaya $500,000 ve depoya +5,000 alan eklendi!", "info");
+            } else if (type === 'coffee') {
+                showModal("TEŞEKKÜRLER!", "Geliştiriciye kahve ısmarladın! Desteğin için teşekkürler.", "info");
+            }
+            playSound('upgrade');
+            updateUI();
+            saveGame();
+        }
+
+        // --- AR-GE VE LANSMAN MOTORU ---
+        const cpuSelect = document.getElementById('select-cpu');
+        const screenSelect = document.getElementById('select-screen');
+        const cameraSelect = document.getElementById('select-camera');
+        const bodySelect = document.getElementById('select-body');
+        const batterySelect = document.getElementById('select-battery');
+
+        function calculatePreview() {
+            let cpu = cpuSelect.value.split(',').map(Number);
+            let screen = screenSelect.value.split(',').map(Number);
+            let cam = cameraSelect.value.split(',').map(Number);
+            let body = bodySelect.value.split(',').map(Number);
+            let bat = batterySelect.value.split(',').map(Number);
+            
+            let totalCost = cpu[0] + screen[0] + cam[0] + body[0] + bat[0] + 75; 
+            let totalPrice = cpu[1] + screen[1] + cam[1] + body[1] + bat[1] + 165; 
+            
+            const badge = document.getElementById('patent-badge');
+            let isPatentEligible = (cpu[0] === 150 && screen[0] === 100 && cam[0] === 110);
+            if (isPatentEligible) {
+                badge.innerText = "⭐ Amiral Gemisi Patenti Uygun! (Fiyata +%35 Kalıcı Prim)";
+                badge.style.color = "var(--accent-green)";
+            } else {
+                badge.innerText = "Patent Uygunluğu: Standart Cihaz";
+                badge.style.color = "var(--accent-amber)";
+            }
+
+            document.getElementById('preview-cost').innerText = `-$${totalCost}`;
+            document.getElementById('preview-price').innerText = `+$${totalPrice}`;
+            
+            return { cost: totalCost, price: totalPrice, isPatent: isPatentEligible };
+        }
+
+        [cpuSelect, screenSelect, cameraSelect, bodySelect, batterySelect].forEach(el => {
+            el.addEventListener('change', () => { playSound('click'); calculatePreview(); });
+        });
+
+        document.getElementById('btn-apply-design').addEventListener('pointerdown', (e) => {
+            const newDesign = calculatePreview();
+            baseCostPerUnit = newDesign.cost; 
+            baseSellPrice = newDesign.price;
+            
+            let reviewScore = Math.min(9.9, ((baseCostPerUnit / 350) * 4 + 5.8)).toFixed(1);
+            
+            if (newDesign.isPatent) {
+                patentCount++;
+                patentBonusMultiplier = 1.35;
+                document.getElementById('factory-model-name').innerText = "Patentli Pro Amiral Model";
+            } else {
+                patentBonusMultiplier = 1.0;
+                document.getElementById('factory-model-name').innerText = "Özel Amiral Model";
+            }
+
+            isHypeActive = true;
+            hypeMultiplier = 3;
+            hypeTimeRemaining = 60;
+            
+            document.getElementById('display-review-score').innerText = reviewScore + "/10";
+            document.getElementById('hype-banner').style.display = 'block';
+
+            playSound('hype');
+            showModal("KÜRESEL LANSMAN BAŞARILI!", `Teknoloji basını yeni modelinize <b>${reviewScore}/10</b> verdi!<br><br>🔥 Ön sipariş çılgınlığı başladı: Sonraki <b>60 saniye boyunca</b> satış fiyatınız 3 katına çıktı!`, "info");
+
+            updateUI();
+            saveGame();
+            if (vibrationEnabled && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+            switchTab('factory', document.querySelector('.bottom-nav .nav-item:nth-child(1)'));
+        });
+
+        calculatePreview();
+        updateUI();
+    </script>
+</body>
+</html>
